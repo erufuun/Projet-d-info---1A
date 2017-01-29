@@ -1,0 +1,47 @@
+# Phrases simples : pronom, verbe, article, nom
+# Dictionnaire defini
+# Une phrase unique
+
+Nom = {"apple" :  ("pomme", "f", "s")}
+Pronom = {"I" : ("Je", 1, "s"), "You" : ("Tu", 2, "s")}
+Verbe = {"eat" : ("mange", 1, "s"), "like" : ("aime", 1, "s")}
+Article = {"an" : ("une", "f")}
+
+def decompose (s) :
+        # decomposer une phrase
+        C = []
+        i = 0
+        n = len(s)
+        while i < n :
+                mot = ""
+                while (i < n) and (s[i] !=" ")  :
+                        t = s[i]
+                        mot = mot+ str(s[i])
+                        i += 1
+                C += [str(mot)]
+                i += 1
+        return C
+
+ch = "I eat an apple"
+print(decompose(ch))
+                
+def grammaire_simple (dec) :
+        # Phrases du type : pronom, verbe, article, nom
+        pronom = dec[0]
+        verbe = dec[1]
+        article = dec[2]
+        nom = dec[3]
+        return pronom, verbe, article, nom
+
+def traduction (s) :
+        S = decompose(s)
+        pronom, verbe, article, nom = grammaire_simple(S)
+        # Pronom
+        pronom = Pronom[pronom][0]
+        verbe = Verbe[verbe][0]
+        article = Article[article][0]
+        nom = Nom[nom][0]
+        return (pronom +" "+ verbe +" " + article + " " + nom)
+                
+print(traduction(ch))
+        
