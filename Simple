@@ -3,8 +3,8 @@
 # Une phrase unique
 
 Nom = {"apple" :  ("pomme", "f", "s")}
-Pronom = {"I" : ("Je", 1, "s"), "You" : ("Tu", 2, "s")}
-Verbe = {"eat" : ("mange", 1, "s"), "like" : ("aime", 1, "s")}
+Pronom = {"I" : ("Je", 1, "s")}
+Verbe = {"eat" : ("mange", 1, "s")}
 Article = {"an" : ("une", "f")}
 
 def decompose (s) :
