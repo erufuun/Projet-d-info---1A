@@ -66,11 +66,11 @@ def hashify_sent (phrase) :
                 i = j + 1
         return text
 
-###########################
-#                                                  #
-#      Remplir le dictionnaire       # 
-#                                                  #
-###########################
+######################################
+#                                                                        #
+#       Ajouter un mot dans le dictionnaire        # 
+#                                                                        #
+######################################
 # Ajouter un mot au dictionnaire final avec une occurence occu et une traduction trad
 def ajout_mot (mot, trad, dictionnaire, occu) :
         dic = dictionnaire.get(mot, {}) # Dictionnaire des traductions possibles de mot (anglais)
@@ -83,7 +83,7 @@ def ajout_mot (mot, trad, dictionnaire, occu) :
 #                                                  #
 ###########################
 # Trouver les mots toujours traduit de la meme facon dans le texte.
-# Meme nombre de phrases : une phrase en anglais traduit par une phrase en francais.
+# H : Meme nombre de phrases : une phrase en anglais traduit par une phrase en francais.
 def identique (text, texte, dico, freq) :
         # text est le texte en anglais, texte celui en francais : une chaine de caracteres (texte "brut").
         anglais, francais = hashify_sent (text), hashify_sent (texte) # Liste de mots pour occurence
@@ -117,12 +117,96 @@ def identique (text, texte, dico, freq) :
                                                         pass
                                                 else : # Si Y est dans la phrase en francais
                                                         par_ligne = False
-                                if (par_ligne) : # Mot a ajouter qui a une meme occurence sur tout le texte
+                                if (par_ligne) and (X != ""): # Mot a ajouter qui a une meme occurence sur tout le texte
                                         ajout_mot (X, Y, dico, dic_fr[Y])
-        return dico
+        return dico, freq
+
+# Ne garder que les mots qui n'ont qu'une seule traduction
+def unifid (dico) :
+        d = {} # Dictionnaire epure
+        for X in dico :
+                if len(dico[X]) == 1 : # Une seule traduction possible
+                        d[X] = dico[X]
+        return d
 
 def par_paire (text, texte, dico, freq) :
         pass
+
+################################
+#                                                            #
+#    Correspondance par alignement     # 
+#                                                            #
+################################
+# Le cas des mots 1 par 1, successivement
+# Fonction utilitaire : transposition du mot de la place j a la place i
+def transpo (liste, i, j) :
+        c = liste[j]
+        liste.insert(i, c) # Copie du mot a la place i
+        liste.pop(j+1)
+        return liste
+
+# On part de phrases (liste de chaine de caracteres)
+# La fonction unitegal permet de faire correspondre un mot anglais a un mot francais.
+# Cette fonction est valable dans le cas de longueur de phrase identique.
+# Le dictionnaire comporte des mots traduits de la meme facon.
+def unitegal (sentence, phrase, dic_supp) :
+        n = len(sentence)
+        for i in range (n) :
+                t = i # Retenir l'indice du mot traduit
+                word, mot = sentence[i], phrase[i] # Mots en anglais et en francais
+                # 1. Si le mot anglais est deja dans le dictionnaire
+                if (word in dic_supp) :
+                        dic_temp = dic_supp[word]
+                        # a. Si le mot francais est deja dans le dictionnaire
+                        if (mot in dic_temp) : 
+                                ajout_mot (word, mot, dic_supp, 1) # Augmenter l'occu de traduction
+                        # b. Si le mot n'est pas encore dans le dictionnaire
+                        else : 
+                                j = -1 # Indice du mot francais correspondant trouve
+                                l = i + 1
+                                while (j < 0) and (l < n)  : # Recherche eventuelle du mot en francais dans la phrase
+                                        motp = phrase[l]
+                                        if (motp in dic_temp) : # Si le mot francais est dans le dictionnaire
+                                                ajout_mot (word, motp, dic_supp, 1)
+                                                j = l # Retenir l'indice
+                                                transpo(phrase, j, i)
+                                                t = l # Mettre a jour la position du mot en francais
+                                        l += 1
+                                if j < 0 : # Si le mot n'est toujours pas trouve.
+                                        ajout_mot (word, mot, dic_supp, 1) # On garde le mot initial
+                # 2. Si le mot anglais n'est pas dans le dictionnaire
+                else :
+                        ajout_mot (word, mot, dic_supp, 1) # On fait correspondre lineairement.
+        return dic_supp
+
+# Si la traduction est trop peu occurente
+def flitrer_occ (dic) : 
+        pass
+
+# Remplir un dictionnaire hypothetique par alignement des mots 1-1
+# Meme nombre de phrases
+def corresp_1 (text, texte, dico, freq) :
+        # text est le texte en anglais, texte celui en francais : une chaine de caracteres (texte "brut").
+        anglais, francais = phrasify (text), phrasify (texte) # Liste de phrases.
+        n = len(anglais) # = len(francais)
+        dic_supp = dico.copy() # Le dictionnaire renvoye, un dictionnaire d'hypothese de traduction.
+        for i in range (n) :
+                sentence, phrase = hashify_sent(anglais[i]), hashify_sent(francais[i])
+                if len(sentence) == len(phrase) :
+                        unitegal (sentence, phrase, dic_supp)
+        return dic_supp        
+
+###########################
+#                                                  #
+#       Remplir le dictionnaire      # 
+#                                                  #
+###########################
+# Remplir un dictionnaire a partir d'un texte en anglais et un en francais.
+def remplissage (text, texte, dico, freq) :
+        dico, freq = identique (text, texte, dico, freq)
+        dic = unifid (dico)
+        #dic,freq = par_paire (text, texte, dic, freq)
+        return dic
 
 ###########################
 #                                                  #
@@ -144,33 +228,4 @@ def doublecontrole_id (text, texte, dico) :
 def apprend_phrase (sentence, phrase, dico) :
          pass
 
-#############################
-#                                                      #
-#    Traduction avec dictionnaire    # 
-#                                                     #
-#############################
-# Traduction mot a mot : un texte "brut" donne une liste de mots.
-# Si mot manquant, mot laisse tel quel
-def motamot (text, dic) :
-        Text = phrasify (text) # Liste de phrases
-        trad = [] # Texte traduit
-        for sent in Text :
-                sentence = hashify_sent (sent) # Couper la phrase pour en faire une liste de mots
-                for X in sentence : # Traduction un mot = un mot
-                        if (X in dic) and (X != "") : # Mot anglais present dans le dictionnaire : X dictionnaire associe
-                                choisir = [(nomb, trad) for trad, nomb in dic[X].items()]
-                                sorted(choisir, key=itemgetter(0), reverse = True) # Ordre decroissant de freq
-                                trad += [choisir[0][1]] # Traduction la plus frequente
-                        elif X == "" : # Ponctuation
-                                trad+=[","]
-                        else : # Mot absent dans le dictionnaire : tel quel
-                                trad += [X]
-        return liste_to_char(trad)
 
-# Transformer une liste de mots (chaine) en une phrase (chaine de caracteres)
-def liste_to_char (liste) :
-        ch = ""
-        print(liste)
-        for X in liste :
-                ch += X + " "
-        return ch
