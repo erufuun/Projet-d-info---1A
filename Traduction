@@ -1,0 +1,37 @@
+# encoding: utf-8
+# Pour traduire un texte de l'anglais vers le français
+from Learn import *
+
+
+######################################
+#                                    #
+#    Traduction avec dictionnaire    # 
+#                                    #
+######################################
+# Transformer une liste de mots (chaine) en une phrase (chaine de caracteres)
+def liste_to_char (liste) :
+        ch = ""
+        for X in liste :
+                if (X != ",") and (X != ".") : 
+                        ch += " " + X 
+                else :
+                        ch += X
+        return ch
+
+# Traduction mot a mot : un texte "brut" donne une liste de mots.
+# Si mot manquant, mot laisse tel quel
+def motamot (text, dic) :
+        Text = phrasify (text) # Liste de phrases
+        trad = [] # Texte traduit
+        for sent in Text :
+                sentence = hashify_sent (sent) # Couper la phrase pour en faire une liste de mots
+                for X in sentence : # Traduction un mot = un mot
+                        if (X in dic) and (X != "") : # Mot anglais present dans le dictionnaire : X dictionnaire associe
+                                choisir = [(nomb, trad) for trad, nomb in dic[X].items()]
+                                sorted(choisir, key=itemgetter(0), reverse = True) # Ordre decroissant de freq
+                                trad += [choisir[0][1]] # Traduction la plus frequente
+                        elif X == "" : # Ponctuation
+                                trad+=[","]
+                        else : # Mot absent dans le dictionnaire : tel quel
+                                trad += [X]
+        return liste_to_char(trad)
