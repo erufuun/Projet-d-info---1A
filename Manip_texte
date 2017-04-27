@@ -1,7 +1,6 @@
 # encoding: utf-8
 from Learn import *
-
-Fichier = open("Test.txt", "r", encoding="utf-8")
+from Traduction import *
 
 daf = {} # Dictionaire final
 test = {} # Dictionnaire pour tester
@@ -30,7 +29,6 @@ Texte_EN = phrasify (Anglais)
 Texte_FR = phrasify (Francais)
 
 # Decoupage d'une phrase en mots.
-
 #hashify_sent (phrasify(Anglais)[3])print(hashify_sent (phrasify(Anglais)[3]))
 
 Phrase_EN = hashify_sent (phrasify(Anglais)[3])
@@ -40,7 +38,9 @@ Phrase_FR = hashify_sent (phrasify(Francais)[3])
 #print(test)
 
 example = "Fluffy, he ate harmoniously with sad Battgavish. Yes. Then Lotara ate two red plants, green cats."
-essai = identique(Anglais, Francais, daf, frequence) 
-print(essai)
-#print(doublecontrole_id (Anglais, Francais, test))
-print(motamot (example, daf))
+#essai = identique (Anglais, Francais, daf, frequence) 
+#print(essai)
+tenter = remplissage (Anglais, Francais, daf, frequence)
+tenta = corresp_1(Anglais, Francais, tenter, frequence)
+print(tenta)
+print(motamot (example, tenta))
