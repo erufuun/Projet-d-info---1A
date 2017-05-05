@@ -29,13 +29,8 @@ Texte_EN = phrasify (Anglais)
 Texte_FR = phrasify (Francais)
 
 # Decoupage d'une phrase en mots.
-#hashify_sent (phrasify(Anglais)[3])print(hashify_sent (phrasify(Anglais)[3]))
-
 Phrase_EN = hashify_sent (phrasify(Anglais)[3])
 Phrase_FR = hashify_sent (phrasify(Francais)[3])
-
-#test = identique(Anglais, Francais, dictionnaire)
-#print(test)
 
 example = "Fluffy, he ate harmoniously with sad Battgavish. Yes. Then Lotara ate two red plants, green cats."
 #essai = identique (Anglais, Francais, daf, frequence) 
@@ -43,4 +38,10 @@ example = "Fluffy, he ate harmoniously with sad Battgavish. Yes. Then Lotara ate
 tenter = remplissage (Anglais, Francais, daf, frequence)
 tenta = corresp_1(Anglais, Francais, tenter, frequence)
 print(tenta)
-print(motamot (example, tenta))
+test = tenta.copy()
+print(motamot (Anglais, tenta))
+#essai = unitsup(Phrase_EN, Phrase_FR, test)
+#print(essai)
+
+essai = complete (Anglais, Francais, daf, frequence)
+
