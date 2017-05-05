@@ -1,0 +1,18 @@
+# encoding: utf-8
+from Learn import *
+from Manip_texte import *
+
+# Effectuer la fonction identique plusieurs fois pour avoir un dictionnaire correct
+
+dic_test = {}
+freq_test = {}
+
+def deeplearn (dic, freq, ang, fra) :
+        dicti, freque = {}, {}
+        dicti = remplissage (ang, fra, {}, {})
+        dic.update(dicti), freq.update(freque)
+        dic_supp = corresp_1(ang, fra, dic, freq)
+        return dic_supp, freq
+
+#deeplearn(dic_test, freq_test, Anglais, Francais)
+#print(dic_test, freq_test)
