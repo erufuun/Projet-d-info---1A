@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: okabeshu
+"""
 # Programme pour constituer le dictionnaire a partir de deux textes.
 # Un en anglais (a traduire) et un en français (traduction).
 
@@ -43,7 +48,7 @@ def phrasify (brut) :
                 text += [sentence + "."]
         return text
 
-# Decoupage d'un texte (une seule chaine) en une liste de mots.
+# Decoupage d'une phrase (une seule chaine) en une liste de mots.
 def hashify_sent (phrase) :
         text = []
         n = len(phrase)
@@ -81,8 +86,8 @@ def ajout_mot (mot, trad, dictionnaire, occu) :
 def rempl_freq (text, texte) :
         freq = {}
         # text est le texte en anglais, texte celui en francais : une chaine de caracteres (texte "brut").
-        anglais, francais = hashify_sent (text), hashify_sent (texte) # Liste de mots pour occurence
-        dic_en, dic_fr = occurence (anglais), occurence (francais)
+        anglais = hashify_sent (text) # Liste de mots pour occurence
+        dic_en = occurence (anglais)
         for X in dic_en :
                 freq[X] = freq.get(X, 0) + dic_en[X] # Ajouter l'occurence globale
         return freq
@@ -94,20 +99,17 @@ def rempl_freq (text, texte) :
 ###########################
 # Trouver les mots toujours traduit de la meme facon dans le texte.
 # H : Meme nombre de phrases : une phrase en anglais traduit par une phrase en francais.
-def identique (text, texte, dico, freq) :
+def identique (text, texte, dico) :
         # text est le texte en anglais, texte celui en francais : une chaine de caracteres (texte "brut").
         anglais, francais = hashify_sent (text), hashify_sent (texte) # Liste de mots pour occurence
-        # 1. Remplir le dictionnaire freq
         dic_en, dic_fr = occurence (anglais), occurence (francais)
-        for X in dic_en :
-                freq[X] = freq.get(X, 0) + dic_en[X] # Ajouter l'occurence globale
         sentences, phrases = phrasify (text), phrasify (texte) # Texte decoupe en phrases (liste de chaines)
         n = len(sentences) # Nombre de phrases
-        # 2. Comparaison d'occurence dans tout le texte
+        # 1. Comparaison d'occurence dans tout le texte
         for X in dic_en :
                 for Y in dic_fr :
                         if (dic_en[X] == dic_fr[Y]) : # Meme occurence globale.
-        # 3. Comparaison d'occurence locale : phrase par phrase.
+        # 2. Comparaison d'occurence locale : phrase par phrase.
                                 par_ligne = True # Indicateur d'occurence locale
                                 for i in range (n) :
                                         sentence, phrase = sentences[i], phrases[i] # Une phrase : une chaine de caractere
@@ -129,7 +131,7 @@ def identique (text, texte, dico, freq) :
                                                         par_ligne = False
                                 if (par_ligne) and (X != ""): # Mot a ajouter qui a une meme occurence sur tout le texte
                                         ajout_mot (X, Y, dico, dic_fr[Y])
-        return dico, freq
+        return dico
 
 # Ne garder que les mots qui n'ont qu'une seule traduction
 def unifid (dico) :
@@ -139,19 +141,15 @@ def unifid (dico) :
                         d[X] = dico[X]
         return d
 
-def par_paire (text, texte, dico, freq) :
-        pass
-
 ###########################
 #                                                  #
 #       Remplir le dictionnaire      # 
 #                                                  #
 ###########################
 # Remplir un dictionnaire a partir d'un texte en anglais et un en francais.
-def remplissage (text, texte, dico, freq) :
-        dico, freq = identique (text, texte, dico, freq)
+def remplissage (text, texte, dico) :
+        dico = identique (text, texte, dico)
         dic = unifid (dico)
-        #dic, freq = par_paire (text, texte, dic, freq)
         return dic
 
 ################################
@@ -166,118 +164,141 @@ def transpo (liste, i, j) :
         liste.insert(i, c) # Copie du mot a la place i
         liste.pop(j+1)
         return liste
+    
+############
+#       Test       #
+############
+# ex = ['Il', 'aime', 'manger', 'des', 'pommes', 'mais', 'pas', 'moi']
+# print(transpo(ex, 2, 6))
+# ['Il', 'aime', 'pas', 'manger', 'des', 'pommes', 'mais', 'moi']
 
-# On part de phrases (liste de chaine de caracteres)
-# La fonction unitegal permet de faire correspondre un mot anglais a un mot francais.
-# Cette fonction est valable dans le cas de longueur de phrase identique.
+# Correcteur de balises : enlève les balises avec un mot vide et un repère non nul 
+def supp_vide_balise (balise) :
+    for X in balise : 
+        if (X[0] == "") and (X[1] != 0) : # Balise avec un mot vide et un repère non nul
+            X[1] = 0
+    return balise
+
+# On part d'une phrase (liste de chaine de caracteres).
 # Le dictionnaire comporte des mots traduits de la meme facon.
-def unitegal (sentence, phrase, dic_supp) :
-        n = len(sentence)
-        for i in range (n) : 
-                word, mot = sentence[i], phrase[i] # Mots en anglais et en francais
-                # 1. Si le mot anglais est deja dans le dictionnaire
-                if (word in dic_supp) :
-                        dic_temp = dic_supp[word]
-                        if not (mot in dic_temp) :
-                                # a. Si le mot francais est deja dans le dictionnaire (par "identique")
-                                #ajout_mot (word, mot, dic_supp, 1) # Si le mot francais est deja la
-                                # b. Si le mot n'est pas encore dans le dictionnaire
-                                j = -1 # Indice du mot francais correspondant trouve
-                                l = i + 1
-                                while (j < 0) and (l < n)  : # Recherche eventuelle du mot en francais dans la phrase
-                                        motp = phrase[l]
-                                        if (motp in dic_temp) : # Si le mot francais est dans le dictionnaire
-                                                ajout_mot (word, motp, dic_supp, 1)
-                                                j = l # Retenir l'indice
-                                                transpo(phrase, j, i)
-                                        l += 1
-                                if j < 0 : # Si le mot n'est toujours pas trouve.
-                                        ajout_mot (word, mot, dic_supp, 1) # On garde le mot initial
-                # 2. Si le mot anglais n'est pas dans le dictionnaire
-                else :
-                        ajout_mot (word, mot, dic_supp, 1) # On fait correspondre lineairement.
-        return dic_supp
+# La balise comporte déjà au moins deux balises : le premier et le dernier mot.
+# Remplir le reste des balises via l'alignement des mots (simple : linéaire)
+def affect_lin1 (balise, phrase) :
+    n, m = len(balise), len(phrase) # n < m
+    vide = ["", 0]
+    for k in range (n-1) : # Parcourir la liste des balises
+        if balise[k] == vide : # Une balise vide
+            l = k
+            while balise[l] == vide : # La suivante est aussi vide
+                l += 1
+            #print("l =", l, "k =", k)
+            p, q = (balise[l][1] - (balise[k-1][1] + 1)), (l-k) # Nombres de mots 
+            #print("p =", p, "q =", q)
+            # Car le balises déjà présentes ont pour "repère", le bon mot dans la phrase                               
+            pas = p // q
+            #print("pas =", pas)
+            ou, whe = k, balise[k-1][1] + 1 # Parcourir : ou pour la balise, whe pour la phrase
+            # Tant que p / q n'est pas un entier
+            while (ou < l) and (pas != p/q)  and (whe < m - 1):
+                expr = ""
+                balise[ou] = [expr, whe]
+                for z in range (pas) :
+                    if whe < m : 
+                        expr += " " + phrase[whe]
+                    whe += 1
+                #print("expr =", expr, "whe =", whe)
+                # whe += -1
+                balise[ou][0] = expr[1:]
+                ou += 1
+                 # Modifier pas
+                if q > 1 : 
+                    p, q = p - pas, q - 1
+                    pas = p // q
+                    #print(pas)
+            # Dès que p / q est un entier
+            #print("pas =", pas, "q =", q)
+            while (ou < l) : # Tant que la balise considérée n'est pas remplie 
+                for y in range (q) : # Remplir les balises vides consécutives
+                    expr = ""
+                    balise[ou] = [expr, whe]
+                    for z in range (pas) : # Remplir la balise avec pas mots
+                        if whe < m : 
+                            expr += " " + phrase[whe]
+                        whe += 1
+                    #print("expr2 =", expr, "whe2 =", balise[ou][1])
+                    balise[ou][0] = expr[1:]
+                    ou += 1
+    return balise
+
+#############
+#       Tests       #
+#############
+# bali = [["Tu", 0], ["", 0], ["", 0], ["", 0], ["moi", 5]]
+# phra = ["Tu", "manges", "beaucoup", "trop", "pour", "moi"]
+# print (affect_lin1 (bali, phra))
+# [['Tu', 0], ['manges', 1], ['beaucoup', 2], ['trop pour', 3], ['moi', 5]]
+
+# Un seul mot manquant
+# bun = "Il aime les pommes."
+# buni = hashify_sent (bun)
+# bari = [["Il", 0], ["", 0], ["pommes", 3]]
+# print (affect_lin1 (bari, buni))
+# [['Il', 0], ['aime les', 1], ['pommes', 3]]
+
+# Un seul mot manquant sur une phrase plus longue
+# bal = [["Tu", 0], ["manges", 1], ["", 0], ["pour", 4], ["moi", 5]]
+# phr = ["Tu", "manges", "beaucoup", "trop", "pour", "moi"]
+# print(affect_lin1(bal, phr))
+# [['Tu', 0], ['manges', 1], ['beaucoup trop', 2], ['pour', 4], ['moi', 5]]
+
+# buni = ['On', 'déjeune', 'souvent', 'dans', 'un', 'parc']
+# balise = [['On', 0], ['', 0], ['', 0], ['', 0], ['dans', 3], ['un', 4], ['parc', 5]]
+# print(affect_lin1(balise, buni))
+# [['On', 0], ['', 1], ['déjeune', 1], ['souvent', 2], ['dans', 3], ['un', 4], ['parc', 5]]
 
 # La fonction unitsup permet de faire correspondre un mot anglais a un mot francais.
 # Cette fonction est valable dans le cas len(anglais) < len(francais)
 # Le dictionnaire comporte des mots traduits de la meme facon.
 def unitsup (sentence, phrase, dic_supp) :
-        n, m = len(sentence), len(phrase) # n < m par hypothese
-        # 1. Baliser la phrase en anglais avec les mots deja la.
-        vide = ["", 0]
-        balise = [vide] * n # Phrase balisee : mot francais * indice dans le phrase
-        for i in range (n) :
-                word, mot = sentence[i], phrase[i] # Mots en anglais et en francais
-                if (word in dic_supp) : # Si le mot anglais est deja dans le dictionnaire
-                        dic_temp = dic_supp[word]
-                        # a. Si le mot francais est deja dans le dictionnaire
-                        if (mot in dic_temp) :
-                                balise[i] = [mot, i] # On ajoute le mot a sa place dans la balise
-                        # b. Si le mot n'est pas encore dans le dictionnaire
-                        else : 
-                                j = -1 # Indice du mot francais correspondant trouve
-                                l = i + 1
-                                while (j < 0) and (l < n)  : # Recherche eventuelle du mot en francais dans la phrase
-                                        motp = phrase[l]
-                                        if (motp in dic_temp) : # Si le mot francais est dans le dictionnaire
-                                                balise[i] = [motp, i]
-                                                j = l # Retenir l'indice
-                                                transpo(phrase, j, i)
-                                        l += 1
-        # 2. Remplir entre les balises avec des predictions.
-        i = 0
-        if (balise[n-1][0] == "") :
-                balise[n-1] = [phrase[m-1], m-1] # Derniere balise toujours remplie
-        if (balise[0][0] == "") :
-                balise[0] = [phrase[0], 0] # Premiere balise toujours remplie
-        while (i < n -1) : # Parcourir la liste des balises et completer entre les balises
-                j = i
-                # Recherche de la deuxieme balise
-                while (j < n - 1) and (balise[j][0] != "") : # Tant qu'il n'y a pas de balise
-                        j += 1
-                        # Combien de mots a estimer ?
-                if (j - i - 1 == 1) : # S'il y a 1 seul mot entre les balises
-                        indicei, indicej = balise[i][1], balise[j][1]
-                        expression_fr = ""
-                        for pos in range (indicei+1, indicej) :
-                                expression_fr += phrase[pos]
-                        balise[i+1] = [expression_fr, indicei + 1]
-                i += 1
-        # 3. Affecter les mots restant par alignement
-        for k in range (n-2) :
-                if balise[k] == vide : # Une balise vide
-                        l = k
-                        while balise[l] == vide : # La suivante est aussi vide
-                                l += 1
-                        p, q = (balise[l][1] - balise[k-1][1]), (l-k) # Nombres de mots                                       
-                        pas = p // q
-                        ou, whe = k, balise[k-1][1] # ou pour la balise, whe pour la phrase
-                        while (ou != l) and (pas != p/q)  and (whe < m - 1):
-                                expr = ""
-                                balise[ou] = [expr, whe]
-                                for z in range (pas) :
-                                        if whe < m : 
-                                                expr += phrase[whe] + " "
-                                        whe += 1
-                                whe += -1
-                                balise[ou][0] = expr
-                                ou += 1
-                        while (ou != l) : 
-                                for y in range (q) :
-                                        expr = ""
-                                        balise[ou] = [expr, whe]
-                                        for z in range (pas) :
-                                                if whe < m : 
-                                                        expr += phrase[whe] + " "
-                                                whe += 1
-                                balise[ou][0] = expr
-                                ou += 1
-        # 4. Affecter les balises au dictionnaire
-        for i in range (n) :
-                ajout_mot (sentence[i], balise[i][0], dic_supp, 0.5)
-        return dic_supp
+    n, m = len(sentence), len(phrase) # n < m par hypothese
+    mini = min(n, m)
+    # 1. Baliser la phrase en anglais avec les mots deja la.
+    vide = ["", 0]
+    balise = [vide] * n # Phrase balisee : mot francais * indice dans le phrase
+    for i in range (mini) :
+        word, mot = sentence[i], phrase[i] # Mots en anglais et en francais
+        if (word in dic_supp) : # Si le mot anglais est deja dans le dictionnaire
+            dic_temp = dic_supp[word]
+            # a. Si le mot francais est deja dans le dictionnaire
+            if (mot in dic_temp) :
+                balise[i] = [mot, i] # On ajoute le mot a sa place dans la balise
+            # b. Si le mot n'est pas encore dans le dictionnaire
+            else : 
+                j = -1 # Indice du mot francais correspondant trouve
+                l = i + 1
+                while (j < 0) and (l < m)  : # Recherche eventuelle du mot en francais dans la phrase
+                    motp = phrase[l]
+                    if (motp in dic_temp) : # Si le mot francais est dans le dictionnaire
+                        balise[i] = [motp, i]
+                        j = l # Retenir l'indice
+                        transpo(phrase, j, i)
+                    l += 1
+    # 2. Remplir entre les balises de début de phrase et de fin de phrase.
+    if (balise[n-1][0] == "") :
+        balise[n-1] = [phrase[m-1], m-1] # Dernière balise toujours remplie
+    if (balise[0][0] == "") :
+        balise[0] = [phrase[0], 0] # Première balise toujours remplie
+    balise = supp_vide_balise (balise)
+    #print("balise_init = ", balise)
+    # 3. Affecter les mots restant par alignement
+    balise = affect_lin1 (balise, phrase)
+    #print("predic balise =", balise)
+    # 4. Affecter les balises au dictionnaire
+    for i in range (n) :
+        ajout_mot (sentence[i], balise[i][0], dic_supp, 1)
+    return dic_supp
 
-# Enleve les traductions vers le mot vide
+# Enlève les traductions vers le mot vide en affectant la valeur 0
 def filtre_vide (dictionnaire) :
         for X in dictionnaire : # Parcours de tout le dictionnaire
                 dic = dictionnaire[X]
@@ -285,47 +306,31 @@ def filtre_vide (dictionnaire) :
                         if trad == "" : # Traduction par aucun mot
                                 dic[trad] = 0
                        
-# Remplir un dictionnaire hypothetique par alignement des mots 1-1
-# Meme nombre de phrases
-def corresp_1 (text, texte, dico, freq) :
-        # text est le texte en anglais, texte celui en francais : une chaine de caracteres (texte "brut").
-        anglais, francais = phrasify (text), phrasify (texte) # Liste de phrases.
-        n = len(anglais) # = len(francais)
-        dic_supp = dico.copy() # Le dictionnaire renvoye, un dictionnaire d'hypothese de traduction.
-        for i in range (n) :
-                sentence, phrase = hashify_sent(anglais[i]), hashify_sent(francais[i])
-                p, q = len(sentence), len(phrase)
-                if p == q :
-                        unitegal (sentence, phrase, dic_supp)
-                if p < q :
-                        unitsup (sentence, phrase, dic_supp)
-        filtre_vide(dic_supp)
-        return dic_supp
+# Remplir un dictionnaire hypothétique par alignement des mots 1-1
+# Même nombre de phrases
+def corresp_1 (text, texte, dico) :
+    # text est le texte en anglais, texte celui en francais : une chaêne de caractères (texte "brut").
+    anglais, francais = phrasify (text), phrasify (texte) # Liste de phrases.
+    n = len(anglais) # = len(francais)
+    dic_supp = dico.copy() # Le dictionnaire renvoye, un dictionnaire d'hypothese de traduction.
+    for i in range (n) :
+        sentence, phrase = hashify_sent(anglais[i]), hashify_sent(francais[i])
+        unitsup (sentence, phrase, dic_supp)
+    filtre_vide(dic_supp)
+    return dic_supp
 
-def complete (text, texte, dico, freq) :
-        memetrad = remplissage(text, texte, dico, freq)
-        hypoth = corresp_1(text,texte, memetrad, freq)
-        return hypoth
+def complete (text, texte, dico) :
+    freq = rempl_freq(text, texte)
+    memetrad = remplissage(text, texte, dico)
+    hypoth = corresp_1(text,texte, memetrad)
+    return memetrad, hypoth, freq
 
-###########################
-#                                                  #
-#    Correction du dictionnaire    # 
-#                                                  #
-###########################
-# Double controle
-# Faire une traduction EN-FR et une FR-EN pour voir les points communs.
-def doublecontrole_id (text, texte, dico) :
-        daf = identique(text, texte, {}) # EN-FR
-        dfa = identique(texte, text, {}) # FR-EN
-        for X in daf :
-                if (dfa[daf[X]]==X) : # Meme traduction quel que soit le sens
-                        dico[X] = dico.get(daf[X], daf[X])
-        return dico
 
 # Apprentissage independant
 # Apprentissage d'une phrase
 def apprend_phrase (sentence, phrase, dico) :
          pass
+
 
 
 
