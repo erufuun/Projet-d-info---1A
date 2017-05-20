@@ -1,4 +1,8 @@
-# encoding: utf-8
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: okabeshu
+"""
 from Learn import *
 from Traduction import *
 
@@ -6,11 +10,11 @@ daf = {} # Dictionaire final
 test = {} # Dictionnaire pour tester
 frequence = {} # Occurence du mot dans la langue
 
-###########################
-#                                                  #
+#########################################
+#                                       #
 #         Lecture des fichiers          # 
-#                                                  #
-###########################
+#                                       #
+#########################################
 Anglais = open("Test_anglais.txt", "r", encoding="utf-8")
 Anglais = Anglais.read()
 #print(Anglais)
@@ -19,11 +23,11 @@ Francais = open("Test_francais.txt", "r", encoding="utf-8")
 Francais = Francais.read()
 #print(Francais)
 
-###########################
-#                                                  #
+########################################
+#                                      #
 #         Traitement de texte          # 
-#                                                  #
-###########################
+#                                      #
+########################################
 # Decoupage du fichier texte en phrase.
 Texte_EN = phrasify (Anglais)
 Texte_FR = phrasify (Francais)
@@ -32,16 +36,22 @@ Texte_FR = phrasify (Francais)
 Phrase_EN = hashify_sent (phrasify(Anglais)[3])
 Phrase_FR = hashify_sent (phrasify(Francais)[3])
 
+# Remplissage du dictionnaire des fréquences
+frequence = rempl_freq(Anglais)
+
 example = "Fluffy, he ate harmoniously with sad Battgavish. Yes. Then Lotara ate two red plants, green cats."
 #essai = identique (Anglais, Francais, daf, frequence) 
 #print(essai)
-tenter = remplissage (Anglais, Francais, daf, frequence)
-tenta = corresp_1(Anglais, Francais, tenter, frequence)
-print(tenta)
+tenter = remplissage (Anglais, Francais, daf)
+tenta = corresp_1(Anglais, Francais, tenter)
+#print(tenta)
 test = tenta.copy()
-print(motamot (Anglais, tenta))
+tr = motamot (Anglais, tenta)
+print(tr)
 #essai = unitsup(Phrase_EN, Phrase_FR, test)
 #print(essai)
 
-essai = complete (Anglais, Francais, daf, frequence)
+dic_sur, dic_hyp, fre = complete (Anglais, Francais, daf)
+
+# print(paragraphy(phrasify(Anglais)))
 
