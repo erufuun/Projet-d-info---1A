@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: okabeshu
+"""
+from Learn import *
+from Traduction import *
+from Court import *
+from tkinter import * 
+from tkinter.filedialog import *
+from tkinter.messagebox import *
+import os
+
+# Créer la fenêtre
+fenetre = Toplevel()
+
+##############################
+#                            #
+#         Fonctions          # 
+#                            #
+##############################
+def alert():
+    showinfo("alerte", "Bravo!")
+    
+def apropos():
+    showinfo("Remerciement", "Merci de votre utilisation ! Ce programme est en cours de développement")
+    
+# Manipulation de fichier
+def texte_anglais () : 
+    global EN
+    filename = askopenfilename(title="Ouvrir votre texte à traduire",filetypes=[('txt files','.txt'),('all files','.*')])
+    fichier = open(filename, "r", encoding="utf-8")
+    anglais = fichier.read()
+    fichier.close()
+    EN.set("À traduire : " + anglais)
+
+def texte_francais () :
+    global FR
+    filename = askopenfilename(title="Ouvrir votre texte traduit",filetypes=[('txt files','.txt'),('all files','.*')])
+    fichier = open(filename, "r", encoding="utf-8")
+    francais = fichier.read()
+    fichier.close()
+    FR.set("Traduction référence : " + francais)
+
+# Permet de charger un dictionnaire
+def charger () : 
+    global dico
+    dic.update(compl_hyp (Anglais, Francais, essai))
+
+# Permet de traduire une chaîne de texte
+def traduire (event) : 
+    global dic
+    chaine.configure(text = "Traduction : " + str(motamot(entree.get(), dic)))
+    
+def contrib_mot () :
+    global dic
+    fenetre1 = Toplevel()
+    
+def consulter () : 
+    global dic
+    print(dic)
+
+# Variables globales
+EN = StringVar()
+FR = StringVar()
+dic = {"Hello" : {"Bonjour" : 2}} # dic_hyp
+
+#dic_sur, dic_hyp, fre = complete (Anglais, Francais, daf)
+
+#def evaluer(event):
+    #chaine.configure(text = "Résultat = " + str(eval(entree.get())))
+
+# ------ Programme principal : ------
+presentation=Label(fenetre, text="Bienvenue dans le traducteur anglais-français Poisson d'or !")
+presentation.pack()
+
+fenetre.title("Poisson d'or")
+fenetre.geometry('500x300') # Largeur * longueur
+
+entree = Entry(fenetre)
+entree.bind("<Return>", traduire)
+entree.grid(column=0,row=0,sticky='EW')
+chaine = Label(fenetre)
+chaine.grid(column=0,row=1,sticky='EW')
+entree.pack(padx = 5, pady = 5)
+chaine.pack(expand=YES, fill=BOTH, padx = 5, pady = 5)
+
+#####################################
+#                                   #
+#         Création du menu          # 
+#                                   #
+#####################################
+# Création du menu
+menubar = Menu(fenetre)
+
+menu3 = Menu(menubar, tearoff=0)
+menu3.add_command(label="Remplir", command=charger)
+menu3.add_command(label="Consulter", command=consulter)
+menubar.add_cascade(label="Dictionnaire", menu=menu3)
+
+menu4 = Menu(menubar, tearoff=0)
+menu4.add_command(label="Traduire", command=texte_anglais)
+menu4.add_command(label="Améliorer", command=alert)
+menubar.add_cascade(label="Traduction", menu=menu4)
+
+menu5 = Menu(menubar, tearoff=0)
+menu5.add_command(label="Texte anglais", command=texte_anglais)
+menu5.add_command(label="Texte francais", command=alert)
+menubar.add_cascade(label="Contribuer", menu=menu5)
+
+
+menu6 = Menu(menubar, tearoff=0)
+menu6.add_command(label="A propos", command=apropos)
+menubar.add_cascade(label="Aide", menu=menu6)
+
+fenetre.config(menu=menubar)
+
+#####################################
+#                                   #
+#         Personnalisation          # 
+#                                   #
+#####################################
+fenetre.grid_columnconfigure(0,weight=1)  # Agrandir le champs
+fenetre.resizable(True,True)
+fenetre.update()
+fenetre.geometry(fenetre.geometry()) 
+
+shachihoko = PhotoImage(file="Shachihoko.gif")
+
+canvas = Canvas(fenetre,width=600, height=600)
+canvas.create_image(0, 0, anchor=NW, image=shachihoko)
+canvas.grid(column=1,row=1) #sticky='EW'
+canvas.pack(expand=YES, fill=BOTH, padx = 5, pady = 5)
+
+# bouton de sortie
+#sortie=Button(fenetre, text="Fermer", command=fenetre.quit)
+#sortie.pack()
+
+#Button(fenetre, text ='Charger texte français').pack(side=RIGHT, padx=5, pady=5)
+
+fenetre.mainloop()
