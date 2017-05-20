@@ -1,37 +1,88 @@
+on po#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: okabeshu
+"""
+
 # encoding: utf-8
 # Pour traduire un texte de l'anglais vers le français
 from Learn import *
 
-
-######################################
-#                                    #
+#############################
+#                                                      #
 #    Traduction avec dictionnaire    # 
-#                                    #
-######################################
+#                                                     #
+#############################
 # Transformer une liste de mots (chaine) en une phrase (chaine de caracteres)
 def liste_to_char (liste) :
         ch = ""
         for X in liste :
-                if (X != ",") and (X != ".") : 
+                if (X != ",") and (X != ".") and (X != "’") : 
                         ch += " " + X 
                 else :
                         ch += X
+        if (len(ch) > 0) : 
+                ch = ch[1:] # Enlever le premier espace
         return ch
+
+#############
+#       Tests       #
+#############
+# print(liste_to_char(["Je", "suis", "correct", "."]))
+# "Je suis correct."
+# print(liste_to_char(["Exemple", ":", "la ponctuation", ",", "c", "’", "est", "complexe", "."]))
+# "Exemple : la ponctuation, c’ est complexe."
+
+# Supprimer les espaces en trop entre les mots.
+def suppr_espaces (trad) : 
+    # trad est une phrase traduite en français (chaîne de caractère)
+    phraselist = hashify_sent (trad)
+    sansesp = []
+    for X in phraselist :
+        if X != "" :
+            sansesp += [" " + X]
+    return liste_to_char(sansesp)
+
+example = "Puis, je pensé idée Lotara,    j ai pensé Lotara pensé  son vieil et    guérir qui  j ai pensé Lotara pensé  son vieil âge et ses blessures dues à cette industrie du loisir."
 
 # Traduction mot a mot : un texte "brut" donne une liste de mots.
 # Si mot manquant, mot laisse tel quel
 def motamot (text, dic) :
-        Text = phrasify (text) # Liste de phrases
-        trad = [] # Texte traduit
-        for sent in Text :
-                sentence = hashify_sent (sent) # Couper la phrase pour en faire une liste de mots
-                for X in sentence : # Traduction un mot = un mot
-                        if (X in dic) and (X != "") : # Mot anglais present dans le dictionnaire : X dictionnaire associe
-                                choisir = [(nomb, trad) for trad, nomb in dic[X].items()]
-                                sorted(choisir, key=itemgetter(0), reverse = True) # Ordre decroissant de freq
-                                trad += [choisir[0][1]] # Traduction la plus frequente
-                        elif X == "" : # Ponctuation
-                                trad+=[","]
-                        else : # Mot absent dans le dictionnaire : tel quel
-                                trad += [X]
-        return liste_to_char(trad)
+    Text = phrasify (text) # Liste de phrases
+    trad = [] # Texte traduit
+    for sent in Text :
+        sentence = hashify_sent (sent) # Couper la phrase pour en faire une liste de mots
+        for X in sentence : # Traduction un mot = un mot
+            if (X in dic) and (X != "") : # Mot anglais present dans le dictionnaire : X dictionnaire associe
+                choisir = [(nomb, trad) for trad, nomb in dic[X].items()]
+                choisir = sorted(choisir, key=itemgetter(0), reverse = True) # Ordre decroissant de freq
+                trad += [choisir[0][1]] # Traduction la plus frequente
+            elif X == "" : # Ponctuation
+                trad+=[","]
+            else : # Mot absent dans le dictionnaire : tel quel
+                trad += [X]
+        trad += "."
+    return (liste_to_char(trad)) 
+
+
+###########################
+#                                                  #
+#    Correction du dictionnaire    # 
+#                                                  #
+###########################
+# Double controle
+# Faire une traduction EN-FR et une FR-EN pour voir les points communs.
+def doublecontrole_id (text, texte, dico) :
+    daf = identique(text, texte, {}) # EN-FR
+    dfa = identique(texte, text, {}) # FR-EN
+    for X in daf :
+        if (dfa[daf[X]]==X) : # Meme traduction quel que soit le sens
+            dico[X] = dico.get(daf[X], daf[X])
+    return dico
+
+# Faire un rétro contrôle du résultat obetnu.
+# Comparer la traduction par l'algorithme avec la vraie traduction.
+def retro1 (trad, texte) : 
+    # trad est la traduction par une fonction de traduction
+    pass
+
