@@ -179,6 +179,12 @@ def supp_vide_balise (balise) :
             X[1] = 0
     return balise
 
+############
+#       Test       #
+############
+#bali = [["Tu", 0], ["", 0], ["", 3], ["", 0], ["moi", 5]]
+#print(supp_vide_balise (bali))
+
 # On part d'une phrase (liste de chaine de caracteres).
 # Le dictionnaire comporte des mots traduits de la meme facon.
 # La balise comporte déjà au moins deux balises : le premier et le dernier mot.
@@ -210,7 +216,7 @@ def affect_lin1 (balise, phrase) :
                 # whe += -1
                 balise[ou][0] = expr[1:]
                 ou += 1
-                 # Modifier pas
+                # Modifier pas
                 if q > 1 : 
                     p, q = p - pas, q - 1
                     pas = p // q
@@ -256,6 +262,12 @@ def affect_lin1 (balise, phrase) :
 # print(affect_lin1(balise, buni))
 # [['On', 0], ['', 1], ['déjeune', 1], ['souvent', 2], ['dans', 3], ['un', 4], ['parc', 5]]
 
+#balise_init =  [['Claude', 0], ['', 0], ['', 0], ['un', 4], ['parc', 5], ['', 0], ['', 0], ['', 0], ['', 0], ['mystérieuse', 10]]
+#bal = ['Claude', 'vit', 'près', 'd','un','parc','connu','pour','une','raison','mystérieuse']
+
+#print(affect_lin1(balise_init, bal))
+
+
 # La fonction unitsup permet de faire correspondre un mot anglais a un mot francais.
 # Cette fonction est valable dans le cas len(anglais) < len(francais)
 # Le dictionnaire comporte des mots traduits de la meme facon.
@@ -272,6 +284,7 @@ def unitsup (sentence, phrase, dic_supp) :
             # a. Si le mot francais est deja dans le dictionnaire
             if (mot in dic_temp) :
                 balise[i] = [mot, i] # On ajoute le mot a sa place dans la balise
+                #print(mot)
             # b. Si le mot n'est pas encore dans le dictionnaire
             else : 
                 j = -1 # Indice du mot francais correspondant trouve
@@ -279,7 +292,7 @@ def unitsup (sentence, phrase, dic_supp) :
                 while (j < 0) and (l < m)  : # Recherche eventuelle du mot en francais dans la phrase
                     motp = phrase[l]
                     if (motp in dic_temp) : # Si le mot francais est dans le dictionnaire
-                        balise[i] = [motp, i]
+                        balise[i] = [motp, l]
                         j = l # Retenir l'indice
                         transpo(phrase, j, i)
                     l += 1
@@ -299,12 +312,15 @@ def unitsup (sentence, phrase, dic_supp) :
     return dic_supp
 
 # Enlève les traductions vers le mot vide en affectant la valeur 0
+# Suppression des traductions de "" par autre chose que ""
 def filtre_vide (dictionnaire) :
-        for X in dictionnaire : # Parcours de tout le dictionnaire
-                dic = dictionnaire[X]
-                for trad in dic :
-                        if trad == "" : # Traduction par aucun mot
-                                dic[trad] = 0
+    for X in dictionnaire : # Parcours de tout le dictionnaire
+        if X == "" : # Le mot considéré est ""
+            dictionnaire[X] = {"" : 1}
+        dic = dictionnaire[X]
+        for trad in dic :
+            if trad == "" : # Traduction par aucun mot
+                dic[trad] = 0
                        
 # Remplir un dictionnaire hypothétique par alignement des mots 1-1
 # Même nombre de phrases
@@ -325,13 +341,70 @@ def complete (text, texte, dico) :
     hypoth = corresp_1(text,texte, memetrad)
     return memetrad, hypoth, freq
 
+def compl_hyp (text,texte, dico) : 
+    memetrad, hypoth, freq = complete (text, texte, dico)
+    return hypoth
 
 # Apprentissage independant
 # Apprentissage d'une phrase
 def apprend_phrase (sentence, phrase, dico) :
-         pass
+    pass
+
+# Apprentissage d'un mot
+def apprend_mot (word, mot, dico) : 
+    d = {"word" : {"mot" : 1}}
+    return dico.update (d)
+
+################################
+#                                                            #
+#    Comparateur de traduction     # 
+#                                                            #
+################################
+# Mesure la distance entre une liste de caractères et une autre liste de caractères.
+def distance (tradu, liste) :
+    # On suppose que tradu et liste sont des listes de même longueur
+    compt = []
+    n = len (liste) # = len(tradu)
+    for i in range (n) : 
+        s = 0
+        t, l = tradu[i], liste[i]
+        print("t =", t, "l =", l)
+        p, q = len(t), len(l) # Longueur des mots à comparer
+        for j in range (min(p, q)) : 
+            lett, letl = t[j], l[j] # Lettre du mot
+            print("lett =", lett, "letl =", letl)
+            if not((lett == letl) or (lett.lower() == letl) or (lett == letl.lower())) :
+                s += 1
+        for k in range (abs(q - p)) :
+            s += 1
+        print("s =", s)
+        compt += [s]
+    return compt
+
+#############
+#       Tests       #
+#############
+#print(distance (["avoir", "manger"], ["Avoir", "mangera"]))
+# [0, 1]
+#print(distance (["avoir", "manger"], ["Avait", "mangé"]))
+# [2, 2]
+    
+# Mesure la distance de traduction sur des textes.
+def dist_txt (traduction, texte) :
+    trad, txt = phrasify (traduction), phrasify (texte)
+    # On suppose qu'ils ont le même nombre de phrases.
+    D = [] # liste des distances
+    for i in range (len(trad)) :
+        tra, tx = trad[i], txt[i]
+        dist = distance(tra, tx) # liste des distances
+        d = 0 
+        for i in range (len(dist)) : 
+            d += dist[i]
+        D += [d]
+    return D
 
 
+    
 
 
 
