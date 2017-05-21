@@ -14,35 +14,34 @@ from Traduction import *
 # Test
 Anglais = open("Test_anglais.txt", "r", encoding="utf-8")
 Anglais = Anglais.read()
-
 Francais = open("Test_francais.txt", "r", encoding="utf-8")
 Francais = Francais.read()
 
 # Court
 Court_en = open("Court_en.txt", "r", encoding="utf-8")
 Court_en = Court_en.read()
-
 Court_fr = open("Court_fr.txt", "r", encoding="utf-8")
 Court_fr = Court_fr.read()
 
 # Rossignol
 Nightingale = open("Nightingale Rose.txt", "r", encoding="utf-8")
 Nightingale = Nightingale.read()
-
 Rossignol = open("Rossignol Rose.txt", "r", encoding="utf-8")
 Rossignol = Rossignol.read()
 
 # Chansons
 Songs = open("Songs.txt", "r", encoding="utf-8")
 Songs = Songs.read()
-
 Chansons = open("Chansons.txt", "r", encoding="utf-8")
 Chansons = Chansons.read()
 
-dico = {}
-dic_hyp = {}
-freq = {}
+# Adele
+Adele_en = open("Adele_en.txt", "r", encoding="utf-8")
+Adele_en = Adele_en.read()
+Adele_fr = open("Adele_fr.txt", "r", encoding="utf-8")
+Adele_fr = Adele_fr.read()
 
+freq = {}
 daf = {}
 
 ################################################
@@ -57,18 +56,16 @@ daf = {}
 
 def rempl (daf, freq, n) : 
     for i in range (n) : 
-        print(i)
         # 1
-        dic_hyp1 = compl_hyp (Anglais, Francais, daf)
-        #fre1 = freq_hyp (dic_hyp1)
-        mega_dico(daf, dic_hyp1)
-        #plus_dico(freq,fre1)
+        daf = ajout_texte (Anglais, Francais, daf)
         # 2
-        dic_hyp2 = compl_hyp (Court_en, Court_fr, daf)
-        mega_dico(daf, dic_hyp2)
+        for j in range (2) : 
+            dic_hyp2 = compl_hyp (Court_en, Court_fr, daf)
+            mega_dico(daf, dic_hyp2)
         # 3 
         dic_hyp3 = compl_hyp (Songs, Chansons, daf)
         mega_dico(daf, dic_hyp3)
+        print(i)
     freq = freq_hyp(daf)
     daf = mauvaise_trad (daf, freq, 0.1)
     return daf, freq
