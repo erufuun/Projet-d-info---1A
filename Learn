@@ -69,7 +69,8 @@ def paragraphy (liste) :
     return text
 
 # Découpage du fichier texte (liste de chaines) en paragraphes (liste de chaînes)
-def paragraphy_fal (liste) : 
+def paragraphy_fal (brut) : 
+    liste = phrasify(brut)
     text = []
     n = len(liste)
     i = 0
@@ -97,6 +98,8 @@ def hashify_sent (phrase) :
                                 indic = False 
                         else : 
                                 j += 1 # Faire avancer le curseur
+                if "\n" in mot : 
+                    mot = mot[1:]
                 text += [mot]
                 i = j + 1
         return text
@@ -138,6 +141,7 @@ def identique (text, texte, dico) :
         anglais, francais = hashify_sent (text), hashify_sent (texte) # Liste de mots pour occurence
         dic_en, dic_fr = occurence (anglais), occurence (francais)
         sentences, phrases = paragraphy_fal (text), paragraphy_fal (texte) # Texte decoupe en phrases (liste de chaines)
+        #print("sentences =", sentences, "phrases =", phrases)
         n = len(sentences) # Nombre de phrases
         # 1. Comparaison d'occurence dans tout le texte
         for X in dic_en :
@@ -375,7 +379,7 @@ def mauvaise_trad (dico, prob) :
 # Même nombre de phrases
 def corresp_1 (text, texte, dico) :
     # text est le texte en anglais, texte celui en francais : une chaêne de caractères (texte "brut").
-    anglais, francais = paragraphy_fal(text), paragraphy_fal (texte) # Liste de phrases.
+    anglais, francais = paragraphy_fal (text), paragraphy_fal (texte) # Liste de phrases.
     n = len(anglais) # = len(francais)
     dic_supp = dico.copy() # Le dictionnaire renvoye, un dictionnaire d'hypothese de traduction.
     for i in range (n) :
@@ -501,6 +505,8 @@ def dist_txt (traduction, texte) :
     
 def update (dic1, dic2) : 
     pass
+    
+
     
     
 
