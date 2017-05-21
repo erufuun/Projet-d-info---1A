@@ -92,13 +92,13 @@ def hashify_sent (phrase) :
                 mot = ""
                 j = i # Actualisation du curseur
                 indic = True # Indicateur de fin de phrase : vrai si la phrase n'est pas finie.
-                while (phrase[j] not in [" ", ",", ".", "’"]) and indic :
+                while (phrase[j] not in [" ", ",", ".", "’", "!", "?", ":", ";"]) and indic :
                         mot += phrase[j] # Ajout du caractere.
                         if j + 1 == n :
                                 indic = False 
                         else : 
                                 j += 1 # Faire avancer le curseur
-                if "\n" in mot : 
+                while "\n" in mot : 
                     mot = mot[1:]
                 text += [mot]
                 i = j + 1
@@ -145,6 +145,7 @@ def identique (text, texte, dico) :
         n = len(sentences) # Nombre de phrases
         # 1. Comparaison d'occurence dans tout le texte
         for X in dic_en :
+                #print("X =", X)
                 for Y in dic_fr :
                         if (dic_en[X] == dic_fr[Y]) : # Meme occurence globale.
         # 2. Comparaison d'occurence locale : phrase par phrase.
@@ -186,9 +187,10 @@ def unifid (dico) :
 ###########################
 # Remplir un dictionnaire a partir d'un texte en anglais et un en francais.
 def remplissage (text, texte, dico) :
-        dico = identique (text, texte, dico)
-        dic = unifid (dico)
-        return dic
+    dico = identique (text, texte, dico)
+    #print("dico =", dico)
+    dic = unifid (dico)
+    return dic
 
 ################################
 #                                                            #
@@ -349,6 +351,7 @@ def unitsup (sentence, phrase, dic_supp) :
         ajout_mot (sentence[i], balise[i][0], dic_supp, 1)
     return dic_supp
 
+
 # Enlève les traductions vers le mot vide en affectant la valeur 0
 # Suppression des traductions de "" par autre chose que ""
 def filtre_vide (dictionnaire) :
@@ -361,12 +364,6 @@ def filtre_vide (dictionnaire) :
         for trad in dic :
             if trad == '' : # Traduction par aucun mot
                 dic[trad] = 0
-
-# Supprime les mauvaises traductions
-# Les traductions ayant une probabilité plus faible que prob sont supprimées
-def mauvaise_trad (dico, prob) : 
-    pass
-    
 
 #####################
 #       Tests       #
@@ -393,8 +390,11 @@ def corresp_1 (text, texte, dico) :
 # Renvoie les 3 dictionnaires
 def complete (text, texte, dico) :
     freq = rempl_freq(text)
+    #print("freq =", freq)
     memetrad = remplissage(text, texte, dico)
+    #print("memetrad =", memetrad)
     hypoth = corresp_1(text,texte, memetrad)
+    #print("hypoth =", hypoth)
     return memetrad, hypoth, freq
 
 def compl_hyp (text,texte, dico) : 
@@ -445,13 +445,60 @@ def display_dict_p (dico, word) :
 # dico = {'': {'': 3}, 'a': {'': 0, 'b': 3}}
 # print(display_dict_p (dico, "a"))
 
-# Ajouter le dictionnaire plus au dictionnaire dico
-def mega_dic (dico, plus) : 
+# Ajouter le dictionnaire plus au dictionnaire dico (dictionnaire des mots)
+def mega_dico (dico, plus) : 
     for word in plus : # Parcours du dictionnaire plus
         d = plus[word] # Dictionnaire des traductions possibles de X
         for mot in d : 
             n = d[mot]
             apprend_mot (word, mot, n, dico)
+            
+# Ajouter le dictionnaire plus au dictionnaire freq (fréquences)
+def plus_dico (freq, plus) : 
+    for word in plus : 
+        e = plus[word]
+        if word in freq : # Si le mot a déjà été vu
+            f = freq[word]
+            freq.update({word : e + f})
+        else : # Si le mot n'est pas encore là
+            freq.update({word : e})
+
+def freq_hyp (dico) :
+    pass
+
+#####################
+#       Tests       #
+#####################
+# dico, plus = {'': {'': 3}, 'a': {'': 0, 'b': 3}}, {'' : {'' : 4}, 'c' : {'d' : 2}}
+# mega_dic (dico, plus)
+# print(dico)
+# {'': {'': 7}, 'a': {'': 0, 'b': 3}, 'c': {'d': 2}}
+
+# Supprime les mauvaises traductions
+# Les traductions ayant une probabilité plus faible que prob sont supprimées
+def mauvaise_trad (dico, freq, prob) : 
+    dic = {}
+    for word in dico : # Parcours des mots anglais
+        d, f = dico[word], freq[word]
+        if f >= (1/prob) : # Si le mot a été suffisamment de fois
+            agar = {} # Dictionnaire des traductions
+            for mot in d : # Parcours des traductions possibles
+                print("word =", word, "mot =", mot)
+                val = d[mot]
+                if ((val/f) >= prob) : # Flottants
+                    agar[mot] = val
+            dic[word] = agar
+            print("dic =", dic)
+        else : # On laisse le dictionnaire
+            dic[word] = dico[word]
+    return dic
+   
+#####################
+#       Tests       #
+#####################  
+# dico, freq = {'': {'': 3}, 'a': {'': 1, 'b': 20}}, {'' : 3, 'a' : 21}
+# tra = mauvaise_trad (dico, freq, 0.1)
+# {'': {'': 3}, 'a': {'b': 20}}
 
 ####################################
 #                                  #
@@ -501,11 +548,6 @@ def dist_txt (traduction, texte) :
         D += [d]
     return D
 
-
-    
-def update (dic1, dic2) : 
-    pass
-    
 
     
     
