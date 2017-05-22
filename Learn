@@ -113,10 +113,37 @@ def hashify_sent (phrase) :
 #                                                                        #
 ######################################
 # Ajouter un mot au dictionnaire final avec une occurence occu et une traduction trad
-def ajout_mot (mot, trad, dictionnaire, occu) :
-        dic = dictionnaire.get(mot, {}) # Dictionnaire des traductions possibles de mot (anglais)
-        dic[trad] = dic.get(trad, 0) + occu # Ajout du mot avec son occurence correspondante
-        dictionnaire[mot] = dic
+#def ajout_mot (mot, trad, dictionnaire, occu) :
+    #dic = dictionnaire.get(mot, {}) # Dictionnaire des traductions possibles de mot (anglais)
+    #dic[trad] = dic.get(trad, 0) + occu # Ajout du mot avec son occurence correspondante
+    #dictionnaire[mot] = dic
+        
+# Apprentissage d'un mot avec une probabilité de n
+def apprend_mot (word, mot, dico, n) : 
+    if word in dico : # Si le mot à traduire est déjà dans le dictionnaire
+        di = dico[word]
+        #print("word =", word, "di =", di)
+        if mot in di : # Si le mot traduit est déjà dans le dictionnaire
+            c = di[mot] + n
+            di[mot] = c
+        else : # Si le mot traduit n'est pas encore dans le dictionanire
+            di.update({mot : n})
+        dico.update ({word : di})
+    else : # Si le mot n'est pas encore dans le dictionnaire
+        d = {word : {mot : n}}
+        dico.update (d)
+    #print("dico =", dico)
+
+#####################
+#       Tests       #
+#####################
+# dico = {'': {'': 3}, 'a': {'': 0, 'b': 3}}
+# apprend_mot ('c', 'd', dico, 3)
+# {'': {'': 3}, 'a': {'': 0, 'b': 3}, 'c': {'d': 3}}
+# apprend_mot ('c', 'd', dico, 4)
+# {'': {'': 3}, 'a': {'': 0, 'b': 3}, 'c': {'d': 7}}
+# apprend_mot ('c', 'e', dico, 5)
+# {'': {'': 3}, 'a': {'': 0, 'b': 3}, 'c': {'d': 7, 'e': 5}}
 
 #####################################
 #                                                                      #
@@ -146,11 +173,13 @@ def identique (text, texte, dico) :
         sentences, phrases = paragraphy_fal (text), paragraphy_fal (texte) # Texte decoupe en phrases (liste de chaines)
         #print("sentences =", sentences, "phrases =", phrases)
         n = len(sentences) # Nombre de phrases
+        dictionnaire = {} # dictionnaire renvoyé
         # 1. Comparaison d'occurence dans tout le texte
         for X in dic_en :
                 #print("X =", X)
                 for Y in dic_fr :
                         if (dic_en[X] == dic_fr[Y]) : # Meme occurence globale.
+                                #print("Y =", Y)
         # 2. Comparaison d'occurence locale : phrase par phrase.
                                 par_ligne = True # Indicateur d'occurence locale
                                 for i in range (n) :
@@ -159,21 +188,21 @@ def identique (text, texte, dico) :
                                         locen, locfr = occurence (sentence), occurence (phrase)
                                         existex, existey = (X in locen), (Y in locfr) # Le mot est present dans le phrase.
                                         if existex : # Si X est dans la phrase en anglais
-                                                if existey : # Si Y est dans la phrase en francais
-                                                        if (locen[X] == locfr[Y]) : # Meme occurence locale
-                                                                pass
-                                                        else :
-                                                                par_ligne = False
-                                                else : # Si Y n'est pas dans la phrase en francais
-                                                        par_ligne = False
+                                            if existey : # Si Y est dans la phrase en francais
+                                                if (locen[X] == locfr[Y]) : # Meme occurence locale
+                                                    pass
+                                                else :
+                                                    par_ligne = False
+                                            else : # Si Y n'est pas dans la phrase en francais
+                                                par_ligne = False
                                         else : # Si X n'est pas dans la phrase en anglais
-                                                if not existey : # Si Y n'est pas dans la phrase en francais
-                                                        pass
-                                                else : # Si Y est dans la phrase en francais
-                                                        par_ligne = False
-                                if (par_ligne) and (X != ""): # Mot a ajouter qui a une meme occurence sur tout le texte
-                                        ajout_mot (X, Y, dico, dic_fr[Y])
-        return dico
+                                            if not existey : # Si Y n'est pas dans la phrase en francais
+                                                pass
+                                            else : # Si Y est dans la phrase en francais
+                                                par_ligne = False
+                                if (par_ligne) and (X != ""): # Mot a ajouter qui a une meme occurence sur tout le texte.
+                                        apprend_mot (X, Y, dictionnaire, dic_fr[Y])
+        return dictionnaire
 
 # Ne garder que les mots qui n'ont qu'une seule traduction
 def unifid (dico) :
@@ -190,9 +219,9 @@ def unifid (dico) :
 ###########################
 # Remplir un dictionnaire a partir d'un texte en anglais et un en francais.
 def remplissage (text, texte, dico) :
-    dico = identique (text, texte, dico)
+    dic = identique (text, texte, dico)
     #print("dico =", dico)
-    dic = unifid (dico)
+    dic = unifid (dic)
     return dic
 
 ################################
@@ -356,7 +385,7 @@ def unitsup (sentence, phrase, dic_supp) :
     #print("predic balise =", balise)
     # 4. Affecter les balises au dictionnaire
     for i in range (n) :
-        ajout_mot (sentence[i], balise[i][0], dic_supp, 1)
+        apprend_mot (sentence[i], balise[i][0], dic_supp, 1)
     return dic_supp
 
 #####################
@@ -401,22 +430,14 @@ def corresp_1 (text, texte, dico) :
     filtre_vide(dic_supp)
     return dic_supp
 
-
-# Remplir le dictionnaire avec les deux étapes précédentes
-# Renvoie les 3 dictionnaires
-def complete (text, texte, dico) :
-    freq = rempl_freq(text)
-    #print("freq =", freq)
-    memetrad = remplissage(text, texte, dico)
-    #print("memetrad =", memetrad)
-    hypoth = corresp_1(text,texte, memetrad)
-    #print("hypoth =", hypoth)
-    return memetrad, hypoth, freq
-
 # Remplir le dictionnaire avec les deux étapes précédentes
 # Renvoie le dictionnaire avec des prédictions
-def compl_hyp (text,texte, dico) : 
-    memetrad, hypoth, freq = complete (text, texte, dico)
+def compl_hyp (text, texte, dico) :
+    #print("dico = ", dico)
+    memetrad = remplissage(text, texte, dico)
+    #print("memetrad =", memetrad, "redico =", dico)
+    hypoth = corresp_1(text, texte, memetrad)
+    #print("hypoth =", hypoth)
     return hypoth
 
 # Apprentissage independant
@@ -424,31 +445,6 @@ def compl_hyp (text,texte, dico) :
 def apprend_phrase (sentence, phrase, dico) :
     pass
 
-# Apprentissage d'un mot avec une probabilité de n
-def apprend_mot (word, mot, n, dico) : 
-    if word in dico : # Si le mot à traduire est déjà dans le dictionnaire
-        di = dico[word]
-        if mot in di : # Si le mot traduit est déjà dans le dictionnaire
-            c = di[mot] + n
-            di[mot] = c
-        else : # Si le mot traduit n'est pas encore dans le dictionanire
-            di.update({mot : n})
-        #return dico
-    else : # Si le mot n'est pas encore dans le dictionnaire
-        d = {word : {mot : n}}
-        dico.update (d)
-        #return dico
-
-#####################
-#       Tests       #
-#####################
-# dico = {'': {'': 3}, 'a': {'': 0, 'b': 3}}
-# print(apprend_mot ('c', 'd', 3, dico))
-# {'': {'': 3}, 'a': {'': 0, 'b': 3}, 'c': {'d': 3}}
-# print(apprend_mot ('c', 'd', 4, dico))
-# {'': {'': 3}, 'a': {'': 0, 'b': 3}, 'c': {'d': 7}}
-# print(apprend_mot ('c', 'e', 5, dico))
-# {'': {'': 3}, 'a': {'': 0, 'b': 3}, 'c': {'d': 7, 'e': 5}}
 
 # Afficher les traductions possibles d'un mot
 def display_dict_p (dico, word) :
@@ -467,9 +463,24 @@ def display_dict_p (dico, word) :
 def mega_dico (dico, plus) : 
     for word in plus : # Parcours du dictionnaire plus
         d = plus[word] # Dictionnaire des traductions possibles de X
+        #print ("d =", d)
         for mot in d : 
             n = d[mot]
-            apprend_mot (word, mot, n, dico)
+            #print("word =", word, "mot =", mot)
+            apprend_mot (word, mot, dico, n)
+      
+#####################
+#       Tests       #
+#####################
+# dico, plus = {'': {'': 3}, 'a': {'': 0, 'b': 3}}, {'' : {'' : 4}, 'c' : {'d' : 2}}
+# mega_dic (dico, plus)
+# print(dico)
+# {'': {'': 7}, 'a': {'': 0, 'b': 3}, 'c': {'d': 2}}
+# dic_hyp = {'He': {'Il': 4}, 'Claude': {'Claude': 4}, 'likes': {'aime les': 1}, 'apples': {'pommes': 1}, 'eats': {'': 0}, 'many': {'en': 1}, 'of': {'mange': 1}, 'them': {'beaucoup': 1}, 'with': {'avec': 1}, 'my': {'mon': 1}, 'friend': {'ami': 1}, 'We': {'On': 1}, 'often': {'': 0}, 'have': {'déjeune': 1}, 'lunch': {'souvent': 1}, 'in': {'dans': 1}, 'a': {'un': 2, 'pour': 1}, 'park': {'parc': 2}, 'lives': {'vit': 1}, 'near': {'près': 1}, 'famous': {'d': 1}, 'for': {'connu': 1}, 'mysterious': {'une raison': 1}, 'reason': {'mystérieuse': 1}}
+# daf = {}
+# mega_dico (daf, dic_hyp)
+# daf == dic_hyp : True
+
             
 # Ajouter le dictionnaire plus au dictionnaire freq (fréquences)
 def plus_dico (freq, plus) : 
@@ -495,17 +506,10 @@ def freq_hyp (dico) :
 
 # Ajouter de nouveaux textes de références
 def ajout_texte (text, texte, daf) : 
-    dic_hyp = compl_hyp (text, texte, daf)
+    d = daf.copy()
+    dic_hyp = compl_hyp (text, texte, d)
+    #print("dic_hyp =", dic_hyp, "daf =", daf)
     mega_dico(daf, dic_hyp)
-    
-
-#####################
-#       Tests       #
-#####################
-# dico, plus = {'': {'': 3}, 'a': {'': 0, 'b': 3}}, {'' : {'' : 4}, 'c' : {'d' : 2}}
-# mega_dic (dico, plus)
-# print(dico)
-# {'': {'': 7}, 'a': {'': 0, 'b': 3}, 'c': {'d': 2}}
 
 # Supprime les mauvaises traductions
 # Les traductions ayant une probabilité plus faible que prob (float) sont supprimées
@@ -584,11 +588,6 @@ def dist_txt (traduction, texte) :
     return D
 
 
-    
-    
 
-
-    
-    
 
 
