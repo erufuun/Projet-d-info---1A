@@ -11,80 +11,76 @@ from tkinter.filedialog import *
 from tkinter.messagebox import *
 import os
 
+
 # Créer la fenêtre
-fenetre = Toplevel()
+fenetre = Tk()
 
 ##############################
 #                            #
 #         Fonctions          # 
 #                            #
 ##############################
-def alert():
-    showinfo("alerte", "Bravo!")
-    
+# Message de remerciement
 def apropos():
     showinfo("Remerciement", "Merci de votre utilisation ! Ce programme est en cours de développement")
-    
-# Manipulation de fichier
-def texte_anglais () : 
-    global EN
-    filename = askopenfilename(title="Ouvrir votre texte à traduire",filetypes=[('txt files','.txt'),('all files','.*')])
-    fichier = open(filename, "r", encoding="utf-8")
-    anglais = fichier.read()
-    fichier.close()
-    EN.set("À traduire : " + anglais)
 
-def texte_francais () :
-    global FR
-    filename = askopenfilename(title="Ouvrir votre texte traduit",filetypes=[('txt files','.txt'),('all files','.*')])
-    fichier = open(filename, "r", encoding="utf-8")
-    francais = fichier.read()
-    fichier.close()
-    FR.set("Traduction référence : " + francais)
-
-# Permet de charger un dictionnaire
-def charger () : 
-    global dico
-    dic.update(compl_hyp (Anglais, Francais, essai))
-
-# Permet de traduire une chaîne de texte
+# Permet de traduire une chaîne de texte avec la fonction motamot
 def traduire (event) : 
     global dic
     chaine.configure(text = "Traduction : " + str(motamot(entree.get(), dic)))
-    
-def contrib_mot () :
-    global dic
-    fenetre1 = Toplevel()
-    
-def consulter () : 
-    global dic
-    print(dic)
 
-# Variables globales
+# Effacer le contenu du champs de saisi
+def efface_tout(event) :
+    entree.delete(0, END)
+    chaine.configure(text = "")
+
+def charger (event) : 
+    global dic, freq, quels
+    exec(open("./Remplir.py", encoding="utf-8").read())
+    dic, freq = rempl_dic(daf, fre, 2, quels)
+    
+def valider (event) :
+    global Val1, Val2, Val3, Val4, quels
+    liste = [Val1.get(), Val2.get(), Val3.get(), Val4.get()]
+    confi = ""
+    for i in range (len(liste)) :
+        boo = liste[i] # Valeur du booléen 
+        quels += [boo]
+        v = i + 1
+        confi += "{} booléen {}  \n".format(v, boo)
+    showinfo('info',quels)
+    
+def cata () : 
+    showinfo("Erreur de la nature", "Tu es nul, ton programme est nul, je te méprise. Signé l'ordi. :)")
+
+def maxi () : 
+    showinfo("À la grosse vache", "Maximé, tu ne mérites même pas la vie. Alors pour le bien de l'humanité, chut.")
+
+#######################################
+#                                     #
+#         Variables globales          # 
+#                                     #
+#######################################
 EN = StringVar()
-FR = StringVar()
+FR = StringVar() # 
 dic = {"Hello" : {"Bonjour" : 2}} # dic_hyp
+freq = {} # Dictionnaire des fréquences de mots
 
-#dic_sur, dic_hyp, fre = complete (Anglais, Francais, daf)
+# Choix des textes de références
+Val1 = BooleanVar()
+Val2 = BooleanVar()
+Val3 = BooleanVar()
+Val4 = BooleanVar()
 
-#def evaluer(event):
-    #chaine.configure(text = "Résultat = " + str(eval(entree.get())))
+Val1.set(False)
+Val2.set(True) # Par défaut, on charge le texte court
+Val3.set(False)
+Val4.set(False)
+
+quels = []
+
 
 # ------ Programme principal : ------
-presentation=Label(fenetre, text="Bienvenue dans le traducteur anglais-français Poisson d'or !")
-presentation.pack()
-
-fenetre.title("Poisson d'or")
-fenetre.geometry('500x300') # Largeur * longueur
-
-entree = Entry(fenetre)
-entree.bind("<Return>", traduire)
-entree.grid(column=0,row=0,sticky='EW')
-chaine = Label(fenetre)
-chaine.grid(column=0,row=1,sticky='EW')
-entree.pack(padx = 5, pady = 5)
-chaine.pack(expand=YES, fill=BOTH, padx = 5, pady = 5)
-
 #####################################
 #                                   #
 #         Création du menu          # 
@@ -93,24 +89,10 @@ chaine.pack(expand=YES, fill=BOTH, padx = 5, pady = 5)
 # Création du menu
 menubar = Menu(fenetre)
 
-menu3 = Menu(menubar, tearoff=0)
-menu3.add_command(label="Remplir", command=charger)
-menu3.add_command(label="Consulter", command=consulter)
-menubar.add_cascade(label="Dictionnaire", menu=menu3)
-
-menu4 = Menu(menubar, tearoff=0)
-menu4.add_command(label="Traduire", command=texte_anglais)
-menu4.add_command(label="Améliorer", command=alert)
-menubar.add_cascade(label="Traduction", menu=menu4)
-
-menu5 = Menu(menubar, tearoff=0)
-menu5.add_command(label="Texte anglais", command=texte_anglais)
-menu5.add_command(label="Texte francais", command=alert)
-menubar.add_cascade(label="Contribuer", menu=menu5)
-
-
 menu6 = Menu(menubar, tearoff=0)
-menu6.add_command(label="A propos", command=apropos)
+menu6.add_command(label="À propos", command=apropos)
+menu6.add_command(label="Demander", command=cata)
+menu6.add_command(label="Maxi", command=maxi)
 menubar.add_cascade(label="Aide", menu=menu6)
 
 fenetre.config(menu=menubar)
@@ -120,22 +102,51 @@ fenetre.config(menu=menubar)
 #         Personnalisation          # 
 #                                   #
 #####################################
-fenetre.grid_columnconfigure(0,weight=1)  # Agrandir le champs
-fenetre.resizable(True,True)
-fenetre.update()
-fenetre.geometry(fenetre.geometry()) 
+presentation=Label(fenetre, text="Bienvenue dans le traducteur anglais-français Poisson d'or !")
+presentation.pack()
 
-shachihoko = PhotoImage(file="Shachihoko.gif")
+fenetre.title("Poisson d'or")
+fenetre.geometry('500x300') # Largeur * longueur
 
-canvas = Canvas(fenetre,width=600, height=600)
-canvas.create_image(0, 0, anchor=NW, image=shachihoko)
-canvas.grid(column=1,row=1) #sticky='EW'
-canvas.pack(expand=YES, fill=BOTH, padx = 5, pady = 5)
 
-# bouton de sortie
-#sortie=Button(fenetre, text="Fermer", command=fenetre.quit)
-#sortie.pack()
+# Barre d'insertion
+entree = Entry(fenetre, width = 50)
+entree.bind("<Return>", traduire)
+#entree.grid(column=0,row=0,sticky='EW')
+entree.pack()
 
-#Button(fenetre, text ='Charger texte français').pack(side=RIGHT, padx=5, pady=5)
+# Traduction en-dessous
+chaine = Label(fenetre)
+#chaine.grid(column=0,row=1,sticky='EW')
+#chaine.pack(expand=YES, fill=BOTH)
+chaine.pack()
+
+# Bouton pour effacer la phrase à traduire et la phrase traduite.
+effacer = Button(fenetre, text=u'Effacer')
+effacer.bind("<Button-1>", efface_tout)
+effacer.pack()
+
+# Case à cocher pour les textes de références
+Case1 = Checkbutton(text=u"Mon texte", variable=Val1)
+Case1.pack()
+Case2 = Checkbutton(text=u"Texte court", variable=Val2)
+Case2.pack()
+Case3 = Checkbutton(text=u"The Beatles", variable=Val3)
+Case3.pack()
+Case4 = Checkbutton(text=u"Adele", variable=Val4)
+Case4.pack()
+
+# Valider les textes de références à charger
+coche = Button(fenetre, text=u'Valider les textes')
+coche.bind("<Button-1>", valider)
+coche.pack()
+
+charge = Button(fenetre, text=u'Charger le dictionnaire')
+charge.bind("<Button-1>", charger)
+charge.pack()
 
 fenetre.mainloop()
+
+
+
+
