@@ -52,12 +52,13 @@ def suppr_espaces (trad) :
 # print(suppr_espaces(example))
 # Puis je pensé idée Lotara j ai pensé Lotara pensé son vieil et guérir qui j ai pensé Lotara pensé son vieil âge et ses blessures dues à cette industrie du loisir
 
-# Traduction mot a mot : un texte sous forme de chaîne donne une liste de mots.
+# Traduction mot a mot : un texte sous forme de chaîne donne une chaîne de mots.
 def motamot (brut, dic) : 
     Texte = paragraphy (brut) # Texte découpé en paragraphes (liste de liste de phrases).
     trad, t = [], ''
     for par in Texte : # Par est une liste de phrases
         trad += [motamot_par (par, dic)] # Traduction du paragraphe
+        print("trad =", trad)
     for para in trad :
         t += liste_to_char (para)
     return t
@@ -102,5 +103,4 @@ def doublecontrole_id (text, texte, dico) :
 def retro1 (trad, texte) : 
     # trad est la traduction par une fonction de traduction
     pass
-
 
