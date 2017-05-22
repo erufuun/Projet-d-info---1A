@@ -72,10 +72,7 @@ def motamot_par (text, dic) :
         sentence = hashify_sent (sent) # Couper la phrase pour en faire une liste de mots
         for X in sentence : # Traduction un mot = un mot
             if (X in dic) and (X != "") : # Mot anglais present dans le dictionnaire : X dictionnaire associe
-                choisir = [(nomb, trad) for trad, nomb in dic[X].items()]
-                #print("choisir =", choisir)
-                choisir = sorted(choisir, key=itemgetter(0), reverse = True) # Ordre decroissant de freq
-                trad += [choisir[0][1]] # Traduction la plus frequente
+                trad += [motamot_mot(X, dic)] # Traduction la plus frequente
             elif X == "" : # Ponctuation
                 trad+=[","]
             else : # Mot absent dans le dictionnaire : tel quel
@@ -83,6 +80,19 @@ def motamot_par (text, dic) :
         trad += "."
     #print("trad =", trad)
     return trad
+
+def motamot_mot (word, dic) :
+    choisir = [(nomb, trad) for trad, nomb in dic[word].items()]
+    #print("choisir =", choisir)
+    choisir = sorted(choisir, key=itemgetter(0), reverse = True) # Ordre decroissant de freq
+    return (choisir[0][1]) # Traduction la plus fréquente
+
+#####################
+#       Tests       #
+#####################
+#di = {'Hello': {'Bonjour': 5}, 'I': {'Je': 8, "j'ai": 7, 'je': 3}}
+#print(motamot_mot ("Hello", di))
+#Bonjour
 
 ####################################
 #                                  #
@@ -117,7 +127,7 @@ def trouve_index (liste, mot) :
 # print(trouve_index (liste, 7))
 
 # Améliorer la traduction
-def meilleure_trad (word, trad, ref, dico) : 
+def meilleure_trad (word, ref, trad, dico) : 
     # word est supposé être dans dico
     d = dico[word]
     coef = d[trad] # Coefficient de la mauvaise traduction
@@ -133,17 +143,67 @@ def meilleure_trad (word, trad, ref, dico) :
 # meilleure_trad ("I", "j'ai", "Je", dic)
 # {'Hello': {'Bonjour': 5}, 'I': {'Je': 8, "j'ai": 7, 'je': 3}}
 
-# Faire correspondre les liste pour qu'elles aient la même longeur
+# Faire correspondre les listes entre elles pour connaître les traductions
 # Ref est la liste de référence
-def balise_init (liste, ref) : 
-    n = len(ref)
-    balise = [["", 0]] * n
+def balise_init (anglais, ref, liste, dico) : 
+    n = len(anglais)
+    balise = [[0, 0, False]] * n # Indice de ref, puis de liste
     # Initialiser la balise : remplir avec ce que l'on a déjà trouvé
     for i in range (n) : 
-        mot = ref[i]
-        if mot in liste : # Si le mot est déjà bien traduit
-            j = trouve_index (liste, mot)
-            balise[i] = [mot, j]
+        word = anglais[i] # Le mot anglai à traduire
+        d = dico[word] # Dictionnaire des possibiltiés de traduction
+        # Classer dans l'ordre décroissant de fréquence
+        trie = [(nomb, trad) for trad, nomb in d.items()]
+        #print("trie =", trie)
+        trie = sorted(trie, key=itemgetter(0), reverse = True)
+        tri = [trad for nomb, trad in trie] # Liste triée
+        #print("tri =", tri)
+        ind = False # Indicateur pour voir si on a trouvé le mot dans d ou non
+        e = False # Fiabilité de la traduction
+        # I. ref contient la traduction de word
+        for mot in d : # Évaluer les traductions dans l'ordre décroissant de probabilité
+            if (mot in ref) and (not ind) : 
+                print("mot =", mot)
+                j = trouve_index (ref, mot)
+                # 1. trad contient le même mot
+                if mot in trad :
+                    k = trouve_index (liste, mot)
+                    print("k1 =", k)
+                    e = True # Fiabilité de la traduction
+                # 2. trad ne contient pas le mot en question
+                else :
+                    tr = motamot_mot(word, dico)
+                    k = trouve_index (liste, tr)
+                    print("k2 =", k)
+                ind = True
+        # II. ref ne contient pas la traduction de word
+        if (not ind) : 
+            if i > 0 :
+                j = balise[i-1][0] + 1 # Le mot suivant
+                print("jsec =", j)
+            else : 
+                j = 0
+            tr = motamot_mot(word, dico)
+            print("tr =", tr)
+            k = trouve_index (liste, tr)
+            #print("k3 =", k)
+        balise[i] = [j, k, e]
+    # Corriger la balise
+    li = [(ref, fia) for ref, tra, fia in balise]
+    print("li =", li)
+    laux = [-1] * n
+    # Enregistrer les traductions fiables
+    for i in range (n) : 
+        X = li[i]
+        if X[1] : # Si la traduction est fiable
+            laux[i] = X[0]
+    print("laux =", laux)
+    i = 0
+    # Affecter les indices
+    while (i < n) : 
+        j = i
+        while laux[l] == -1 : # Traduction non fiable
+            
     return balise
 
 #####################
@@ -151,28 +211,46 @@ def balise_init (liste, ref) :
 #####################
 trad = ["Vieil", "ami", "pourquoi", "là", "toi", "paraissaient", "timide"]
 ref = ["Vieil", "ami", "pourquoi", "es-tu", "si", "timide"]
-print(baliser (trad, ref) )
+sen = ["Old", "friend", "why", "are", "you", "so", "shy"]
+dico = {"Old" : {"Vieil" : 3},'friend': {'ami': 7}, 'are': {'là': 2},'so': {'paraissaient': 2},'why': {'pourquoi': 50},'you': {'toi': 12, 'au': 2, 'haut': 2}, 'shy': {'timide': 2}}
+print(balise_init (sen, ref, trad, dico))
 
+tr = ["Il", "aime", "pommes"]
+re = ["Il", "aime", "les", "pommes"]
+se = ["He", "likes", "apples"]
+dicti = {"He":{"Il": 3}, "likes":{"aime":7},"apples":{"pommes" :4}}}
+print(balise_init (se, re, tr, dicti))
+    
 
 def retro_lgn (sentence, phrase, traduction, dico) :
     n = len (sentence) # Référence
     balise = [["", 0]] * n
+    balise_fr = balise_init (sentence, phrase, traduction, dico) # Balise pour relier les phrases en fr
+    bal = [[0, 0]] * n # Balise liant la phrase en anglais aux deux autres phrases
+    #print("balise_fr =", balise_fr)
     # Initialiser la balise avec les traductions correctes
     j, k = 0, 0 # Indice de suivi dans la phrase de référence et la traduction
     for i in range (n) : # Parcourir la phrase
         wo = sentence[i]
         d = dico[wo] # Dictionnaire des possibilités de traduction
         ref, trad = phrase[j], traduction[k] # mot référence et mot traduit
-        if (ref == trad) and (ref in d) : # Si la traduction est bien là 
-            balise[i] = [wo, j]
-        J = j
-        while (ref not in d) and (J < len(phrase)) :
-            J += 1
-            ref = phrase[J]
-        j = J
-            
-            
-    pass
+        if ref in d :
+            pass
+    for i in range (n - 1) :
+        j, k = bal[i][0], bal[i][1] # j : ref, k : trad
+        ji, ka = bal[i+1][0], bal[i+1][1] # ji : ref, ka : trad
+        word, ref, trad = sentence[i], phrase[j:ji], traduction[k:ka], 
+        meilleure_trad (word, ref, trad, dico)
+
+#####################
+#       Tests       #
+#####################
+#tradu = ["Vieil", "ami", "pourquoi", "là", "toi", "paraissaient", "timide"]
+#refe = ["Vieil", "ami", "pourquoi", "es-tu", "si", "timide"]
+#sent = ["Old", "friend", "why", "are", "you", "so", "shy"]
+#dic = {"Old" : {"Vieil" : 3},'friend': {'ami': 7}, 'are': {'là': 2},'so': {'paraissaient': 2},'why': {'pourquoi': 50},'you': {'toi': 12, 'au': 2, 'haut': 2}, 'shy': {'timide': 2}}
+#retro_lgn(sent, refe, tradu, dic)
+
 
 # Faire un rétro contrôle du résultat obetnu.
 # Comparer la traduction par l'algorithme avec la vraie traduction.
@@ -193,5 +271,6 @@ def retro (text, texte, dic) :
 #####################
 text, texte = "Hello, I am here.", "Bonjour, je suis ici."
 #print(retro(text, texte, {"Hello" : {"Bonjour" : 5}, "I" : {"je" : 3, "j'ai" : 7}, "here" : {"ici" : 2}, "am" : {"suis" : 6}}))
+
 
 
