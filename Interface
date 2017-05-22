@@ -36,6 +36,7 @@ def efface_tout(event) :
 
 def charger (event) : 
     global dic, freq, quels
+    dic, freq = {}, {} # Réinitialisation
     exec(open("./Remplir.py", encoding="utf-8").read())
     dic, freq = rempl_dic(daf, fre, 2, quels)
     
@@ -146,6 +147,11 @@ charge.bind("<Button-1>", charger)
 charge.pack()
 
 fenetre.mainloop()
+
+
+
+
+
 
 
 
