@@ -17,7 +17,7 @@ from Learn import *
 def liste_to_char (liste) :
         ch = ""
         for X in liste :
-                if (X != ",") and (X != ".") and (X != "’") : 
+                if (X != ",") and (X != ".") : # and (X != "’") : 
                         ch += " " + X 
                 else :
                         ch += X
@@ -58,9 +58,10 @@ def motamot (brut, dic) :
     trad, t = [], ''
     for par in Texte : # Par est une liste de phrases
         trad += [motamot_par (par, dic)] # Traduction du paragraphe
-        print("trad =", trad)
+        #print("trad =", trad)
     for para in trad :
-        t += liste_to_char (para)
+        #print("para =", para)
+        t += liste_to_char (para) + " "
     return t
 
 # Traduction mot a mot : un texte sous forme de liste de phrases donne une liste de mots.
@@ -80,6 +81,7 @@ def motamot_par (text, dic) :
             else : # Mot absent dans le dictionnaire : tel quel
                 trad += [X]
         trad += "."
+    #print("trad =", trad)
     return trad
 
 ####################################
@@ -97,11 +99,79 @@ def doublecontrole_id (text, texte, dico) :
             dico[X] = dico.get(daf[X], daf[X])
     return dico
 
-def balisify () :
-    pass
+# Trouve l'indice d'un élément dans une liste
+def trouve_index (liste, mot) : 
+    # Le mot est supposé être dans la liste
+    n = len(liste)
+    i, j = 0, -1
+    while (j < 0) and (i < n) : 
+        if liste[i] == mot : # Le premier index
+            j = i
+        i += 1
+    return j
+
+#####################
+#       Tests       #
+#####################
+# liste = [0,1,2,3,4,5,6,7,8,9,10,7]
+# print(trouve_index (liste, 7))
+
+# Améliorer la traduction
+def meilleure_trad (word, trad, ref, dico) : 
+    # word est supposé être dans dico
+    d = dico[word]
+    coef = d[trad] # Coefficient de la mauvaise traduction
+    apprend_mot (word, ref, dico, coef+1) # Améliorer la traduction 
+
+#####################
+#       Tests       #
+#####################
+# dic = {"Hello" : {"Bonjour" : 5}, "I" : {"je" : 3, "j'ai" : 7}}
+# meilleure_trad ("I", "j'ai", "je", dic)
+# {'Hello': {'Bonjour': 5}, 'I': {"j'ai": 7, 'je': 11}}
+# dic = {"Hello" : {"Bonjour" : 5}, "I" : {"je" : 3, "j'ai" : 7}}
+# meilleure_trad ("I", "j'ai", "Je", dic)
+# {'Hello': {'Bonjour': 5}, 'I': {'Je': 8, "j'ai": 7, 'je': 3}}
+
+# Faire correspondre les liste pour qu'elles aient la même longeur
+# Ref est la liste de référence
+def balise_init (liste, ref) : 
+    n = len(ref)
+    balise = [["", 0]] * n
+    # Initialiser la balise : remplir avec ce que l'on a déjà trouvé
+    for i in range (n) : 
+        mot = ref[i]
+        if mot in liste : # Si le mot est déjà bien traduit
+            j = trouve_index (liste, mot)
+            balise[i] = [mot, j]
+    return balise
+
+#####################
+#       Tests       #
+#####################
+trad = ["Vieil", "ami", "pourquoi", "là", "toi", "paraissaient", "timide"]
+ref = ["Vieil", "ami", "pourquoi", "es-tu", "si", "timide"]
+print(baliser (trad, ref) )
+
 
 def retro_lgn (sentence, phrase, traduction, dico) :
-    
+    n = len (sentence) # Référence
+    balise = [["", 0]] * n
+    # Initialiser la balise avec les traductions correctes
+    j, k = 0, 0 # Indice de suivi dans la phrase de référence et la traduction
+    for i in range (n) : # Parcourir la phrase
+        wo = sentence[i]
+        d = dico[wo] # Dictionnaire des possibilités de traduction
+        ref, trad = phrase[j], traduction[k] # mot référence et mot traduit
+        if (ref == trad) and (ref in d) : # Si la traduction est bien là 
+            balise[i] = [wo, j]
+        J = j
+        while (ref not in d) and (J < len(phrase)) :
+            J += 1
+            ref = phrase[J]
+        j = J
+            
+            
     pass
 
 # Faire un rétro contrôle du résultat obetnu.
@@ -113,10 +183,15 @@ def retro (text, texte, dic) :
     n = len(txt) # (= len(trd) = len(ref))
     for i in range (n) : # Parcourir le texte
         sentence, phrase, traduction = txt[i], trd[i], ref[i] 
-        print(sentence)
+        bal_sen, bal_phr, bal_tra = hashify_sent(sentence), hashify_sent (phrase), hashify_sent (traduction)
+        print(bal_sen, bal_phr, bal_tra)
+        
         pass
-    
-print(retro("Hello, I am here.", "Bonjour, je suis ici.", {"Hello" : {"Bonjour" : 5}, "I" : {"je" : 3, "j" : 7}, "here" : {"ici" : 2}, "am" : {"suis" : 6}}))
 
+#####################
+#       Tests       #
+#####################
+text, texte = "Hello, I am here.", "Bonjour, je suis ici."
+#print(retro(text, texte, {"Hello" : {"Bonjour" : 5}, "I" : {"je" : 3, "j'ai" : 7}, "here" : {"ici" : 2}, "am" : {"suis" : 6}}))
 
 
