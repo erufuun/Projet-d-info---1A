@@ -21,11 +21,10 @@ def occurence (texte) :
                 d[X] = d.get(X, 0) + 1
         return d
 
-# Dictionnaire final : anglais en clef, francais par proba en valeur (chaine -> dictionnaire)
-dictionnaire = {}
-
-# Dictionnaire des occurences globales des mots : anglais en clef, occurence (entier) en valeur
-occ_mot = {}
+# Dictionnaire final : anglais en clef, francais en valeur
+# francais : un dictionnaire avec les traductions possibles et sa fréquence 
+# Donc dictionnaire final : chaine -> dictionnaire.
+# Dictionnaire des occurences globales des mots : anglais en clef, occurence (entier) en valeur.
 
 ########################################
 #                                      #
@@ -552,7 +551,7 @@ def distance (tradu, liste) :
     for i in range (n) : 
         s = 0
         t, l = tradu[i], liste[i]
-        print("t =", t, "l =", l)
+        #print("t =", t, "l =", l)
         p, q = len(t), len(l) # Longueur des mots à comparer
         for j in range (min(p, q)) : 
             lett, letl = t[j], l[j] # Lettre du mot
@@ -572,22 +571,32 @@ def distance (tradu, liste) :
 # [0, 1]
 #print(distance (["avoir", "manger"], ["Avait", "mangé"]))
 # [2, 2]
+#print(distance (["avoir", "mangais"], ["Avait", "mangerais"]))
+# [2, 5]
     
 # Mesure la distance de traduction sur des textes.
 def dist_txt (traduction, texte) :
-    trad, txt = phrasify (traduction), phrasify (texte)
+    trad, txt = paragraphy_fal (traduction), paragraphy_fal (texte)
+    print("trad =", trad, "txt =", txt)
     # On suppose qu'ils ont le même nombre de phrases.
     D = [] # liste des distances
-    for i in range (len(trad)) :
-        tra, tx = trad[i], txt[i]
-        dist = distance(tra, tx) # liste des distances
+    for i in range (len(trad)) : # Pour chaque phrase.
+        tra, tx = hashify_sent (trad[i]), hashify_sent(txt[i])
+        dist = distance(tra, tx) # Liste des distances
         d = 0 
         for i in range (len(dist)) : 
             d += dist[i]
         D += [d]
     return D
 
+#####################
+#       Tests       #
+#####################
+#print(dist_txt("Bonjour, je suis ici.", "Bonjour, je serai ici."))
+# [4]
 
+    
+    
 
 
 
