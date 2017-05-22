@@ -82,7 +82,6 @@ def motamot_par (text, dic) :
         trad += "."
     return trad
 
-
 ####################################
 #                                  #
 #    Correction du dictionnaire    # 
@@ -98,9 +97,26 @@ def doublecontrole_id (text, texte, dico) :
             dico[X] = dico.get(daf[X], daf[X])
     return dico
 
+def balisify () :
+    pass
+
+def retro_lgn (sentence, phrase, traduction, dico) :
+    
+    pass
+
 # Faire un rétro contrôle du résultat obetnu.
 # Comparer la traduction par l'algorithme avec la vraie traduction.
-def retro1 (trad, texte) : 
+def retro (text, texte, dic) : 
     # trad est la traduction par une fonction de traduction
-    pass
+    trad = motamot (text, dic) # Traduction à améliorer
+    txt, trd, ref = paragraphy_fal(text), paragraphy_fal(trad), paragraphy_fal (texte)
+    n = len(txt) # (= len(trd) = len(ref))
+    for i in range (n) : # Parcourir le texte
+        sentence, phrase, traduction = txt[i], trd[i], ref[i] 
+        print(sentence)
+        pass
+    
+print(retro("Hello, I am here.", "Bonjour, je suis ici.", {"Hello" : {"Bonjour" : 5}, "I" : {"je" : 3, "j" : 7}, "here" : {"ici" : 2}, "am" : {"suis" : 6}}))
+
+
 
