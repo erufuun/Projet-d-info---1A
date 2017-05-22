@@ -35,13 +35,19 @@ Songs = Songs.read()
 Chansons = open("Chansons.txt", "r", encoding="utf-8")
 Chansons = Chansons.read()
 
+# The Beatles
+Beatles_EN = open("Beatles_EN.txt", "r", encoding="utf-8")
+Beatles_EN = Beatles_EN.read()
+Beatles_FR = open("Beatles_FR.txt", "r", encoding="utf-8")
+Beatles_FR = Beatles_FR.read()
+
 # Adele
 Adele_en = open("Adele_en.txt", "r", encoding="utf-8")
 Adele_en = Adele_en.read()
 Adele_fr = open("Adele_fr.txt", "r", encoding="utf-8")
 Adele_fr = Adele_fr.read()
 
-freq = {}
+fre = {}
 daf = {}
 
 ################################################
@@ -49,25 +55,25 @@ daf = {}
 #         Remplissage du dictionnaire          # 
 #                                              #
 ################################################
-#fr = freq_hyp (daf)
-#print(fr)
-
-#de = mauvaise_trad (daf, fr, 0.1)
-
-def rempl (daf, freq, n) : 
+# Remplir le dictionnaire pour les traductions.
+# Mais avec quels textes ?
+def rempl_dic (daf, freq, n, quels) : 
+    # quels : liste de booléens
     for i in range (n) : 
-        # 1
-        daf = ajout_texte (Anglais, Francais, daf)
-        # 2
-        for j in range (2) : 
-            dic_hyp2 = compl_hyp (Court_en, Court_fr, daf)
-            mega_dico(daf, dic_hyp2)
-        # 3 
-        dic_hyp3 = compl_hyp (Songs, Chansons, daf)
-        mega_dico(daf, dic_hyp3)
+        if quels[0] :
+            ajout_texte (Anglais, Francais, daf)
+        if quels[1] : 
+            for j in range (2) : 
+                ajout_texte (Court_en, Court_fr, daf)
+        if quels[2] :
+            ajout_texte (Beatles_EN, Beatles_FR, daf)
+        if quels[3] :
+            ajout_texte (Adele_en, Adele_fr, daf)
         print(i)
     freq = freq_hyp(daf)
     daf = mauvaise_trad (daf, freq, 0.1)
     return daf, freq
 
-de, freq = rempl(daf, freq, 3)
+
+#rempl_dic (daf, fre, 2, [False, True, False, False])
+
