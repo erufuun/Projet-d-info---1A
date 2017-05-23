@@ -7,6 +7,7 @@
 # encoding: utf-8
 # Pour traduire un texte de l'anglais vers le français
 from Learn import *
+from copy import *
 
 ######################################
 #                                    #
@@ -249,7 +250,7 @@ def balise_init (anglais, ref, liste, dico) :
 def retro_lgn (sentence, phrase, traduction, dico) :
     n = len (sentence) # Référence
     balise = balise_init (sentence, phrase, traduction, dico) # Relier les trois phrases.
-    #print("balise =", balise)
+    print("balise =", balise)
     for i in range (n - 1) :
         j, k = balise[i][0], balise[i][1] # j : ref, k : trad
         ji, ka = balise[i+1][0], balise[i+1][1] # ji : ref, ka : trad
@@ -257,39 +258,44 @@ def retro_lgn (sentence, phrase, traduction, dico) :
         ref = ""
         if balise[i][2] : # Si la traduction est fiable
             ref = phrase[j]
-            #print("ref1 =", ref)
+            print("ref1 =", ref)
         else : 
             for e in range (j, ji) : 
                 ref += " " + phrase[e]
             ref = ref[1:]
-            #print("ref2 =", ref)
+            print("ref2 =", ref)
         trad = motamot_mot(word, dico)
         meilleure_trad (word, ref, trad, dico)
+    # Pour le dernier mot
+    meilleure_trad (sentence[n-1], phrase[balise[n-1][0]], traduction[balise[n-1][1]], dico)
 
 #####################
 #       Tests       #
 #####################
-#tradu = ["Vieil", "ami", "pourquoi", "là", "toi", "paraissaient", "timide"]
-#refe = ["Vieil", "ami", "pourquoi", "es-tu", "si", "timide"]
-#sent = ["Old", "friend", "why", "are", "you", "so", "shy"]
-#dic = {"Old" : {"Vieil" : 3},'friend': {'ami': 7}, 'are': {'là': 2},'so': {'paraissaient': 2},'why': {'pourquoi': 50},'you': {'toi': 12, 'au': 2, 'haut': 2}, 'shy': {'timide': 2}}
-#retro_lgn(sent, refe, tradu, dic)
-#{'Old': {'Vieil': 7}, 'are': {'es-tu': 3, 'là': 2},'friend': {'ami': 15},'shy': {'timide': 2},'so': {'paraissaient': 2, 'si': 3},'why': {'pourquoi': 101},'you': {'': 13, 'au': 2, 'haut': 2, 'toi': 12}}
+# tradu = ["Vieil", "ami", "pourquoi", "là", "toi", "paraissaient", "timide"]
+# refe = ["Vieil", "ami", "pourquoi", "es-tu", "si", "timide"]
+# sent = ["Old", "friend", "why", "are", "you", "so", "shy"]
+# dic = {"Old" : {"Vieil" : 3},'friend': {'ami': 7}, 'are': {'là': 2},'so': {'paraissaient': 2},'why': {'pourquoi': 50},'you': {'toi': 12, 'au': 2, 'haut': 2}, 'shy': {'timide': 2}}
+# retro_lgn(sent, refe, tradu, dic)
+#{'Old': {'Vieil': 4},'are': {'es-tu': 3, 'là': 2},'friend': {'ami': 8},'shy': {'timide': 3},'so': {'paraissaient': 2, 'si': 3},'why': {'pourquoi': 51},'you': {'': 13, 'au': 2, 'haut': 2, 'toi': 12}}
 
 # Faire un rétro contrôle du résultat obetnu.
 # Comparer la traduction par l'algorithme avec la vraie traduction.
+# Le dictionnaire de départ n'est pas modifié
 def retro (text, texte, dic) : 
     # trad est la traduction par une fonction de traduction
     trad = motamot (text, dic) # Traduction à améliorer
     txt, trd, ref = paragraphy_fal(text), paragraphy_fal(trad), paragraphy_fal (texte)
     n = len(txt) # (= len(trd) = len(ref))
-    dico = dic.copy()
+    dico = deepcopy(dic) # Copie sans alias : ne pas modifier dic
     for i in range (n) : # Parcourir le texte
         sentence, phrase, traduction = txt[i], ref[i], trd[i]
         #print("sentence =", sentence, "phrase =", phrase)
         bal_sen, bal_phr, bal_tra = hashify_sent(sentence), hashify_sent (phrase), hashify_sent (traduction)
         #print("bal_sen =", bal_sen, "bal_phr =", bal_phr, bal_tra)
+        print("dic =", dic)
         retro_lgn(bal_sen, bal_phr, bal_tra, dico)
+        print("dico =", dico, "dic =", dic)
     filtre_vide(dico)
     ponctu(dico)
     return dico
@@ -300,5 +306,4 @@ def retro (text, texte, dic) :
 # text, texte = "Hello, I am here.", "Bonjour, je suis ici."
 # print(retro(text, texte, {"" : {"" : 1}, "Hello" : {"Bonjour" : 5}, "I" : {"je" : 3, "j'ai" : 7}, "here" : {"ici" : 2}, "am" : {"suis" : 6}}))
 # {'': {'': 0}, 'Hello': {'Bonjour': 6}, 'I': {'je': 11, "j'ai": 7}, 'here': {'ici': 2}, 'am': {'suis': 7}}
-
 
