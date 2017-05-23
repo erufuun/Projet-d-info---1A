@@ -5,7 +5,7 @@
 """
 from Learn import *
 from Traduction import *
-from Court import *
+from Remplir import *
 from tkinter import * 
 from tkinter.filedialog import *
 from tkinter.messagebox import *
@@ -37,7 +37,7 @@ def efface_tout(event) :
 def charger (event) : 
     global dic, freq, quels
     dic, freq = {}, {} # Réinitialisation
-    exec(open("./Remplir.py", encoding="utf-8").read())
+    #exec(open("./Remplir.py", encoding="utf-8").read())
     dic, freq = rempl_dic(daf, fre, 2, quels)
     
 def valider (event) :
@@ -56,6 +56,20 @@ def cata () :
 
 def maxi () : 
     showinfo("À la grosse vache", "Maximé, tu ne mérites même pas la vie. Alors pour le bien de l'humanité, chut.")
+
+def montre_mot (event) :
+    #display_dict_p (dic, word) 
+    chain.configure(text = "Information : ")
+
+def consult () :
+    Consul = Tk()
+    Consul.title("Trésor")
+    Consul.geometry('400x300') # Largeur * longueur
+    demand = Entry(Consul, width = 50)
+    demand.bind("<Return>", montre_mot)
+    chain = Label(Principal)
+    chain.pack()
+
 
 #######################################
 #                                     #
@@ -90,6 +104,11 @@ quels = []
 # Création du menu
 menubar = Menu(fenetre)
 
+menu5 = Menu(menubar, tearoff=0)
+menu5.add_command(label="Consulter", command=consult)
+menubar.add_cascade(label="Dictionnaire", menu=menu5)
+
+
 menu6 = Menu(menubar, tearoff=0)
 menu6.add_command(label="À propos", command=apropos)
 menu6.add_command(label="Demander", command=cata)
@@ -104,49 +123,58 @@ fenetre.config(menu=menubar)
 #                                   #
 #####################################
 presentation=Label(fenetre, text="Bienvenue dans le traducteur anglais-français Poisson d'or !")
-presentation.pack()
+presentation.pack(fill=BOTH)
 
 fenetre.title("Poisson d'or")
-fenetre.geometry('500x300') # Largeur * longueur
+fenetre.geometry('800x300') # Largeur * longueur
 
-
+Principal = Frame(fenetre, height = 100, width = 200, bd=1, relief=SUNKEN)
+Principal.pack(side = LEFT, fill=BOTH, expand=1)
 # Barre d'insertion
-entree = Entry(fenetre, width = 50)
+entree = Entry(Principal, width = 50)
 entree.bind("<Return>", traduire)
-#entree.grid(column=0,row=0,sticky='EW')
+#entree.grid(column=0,row=0) #,sticky='EW')
 entree.pack()
 
 # Traduction en-dessous
-chaine = Label(fenetre)
-#chaine.grid(column=0,row=1,sticky='EW')
+chaine = Label(Principal)
+#chaine.grid(column=0,row=1) #,sticky='EW')
 #chaine.pack(expand=YES, fill=BOTH)
 chaine.pack()
 
 # Bouton pour effacer la phrase à traduire et la phrase traduite.
-effacer = Button(fenetre, text=u'Effacer')
+effacer = Button(Principal, text=u'Effacer')
 effacer.bind("<Button-1>", efface_tout)
 effacer.pack()
 
+Cadre = Frame(fenetre, height = 100, width = 200, bd=1, relief=SUNKEN)
+Cadre.pack(side = RIGHT, fill=BOTH, expand=1)
+
+Pres_case=Label(Cadre, text="Choisissez les textes références à utiliser")
+Pres_case.pack(fill=BOTH)
+
 # Case à cocher pour les textes de références
-Case1 = Checkbutton(text=u"Mon texte", variable=Val1)
+Case1 = Checkbutton(Cadre, text=u"Mon texte", variable=Val1)
 Case1.pack()
-Case2 = Checkbutton(text=u"Texte court", variable=Val2)
+Case2 = Checkbutton(Cadre, text=u"Texte court", variable=Val2)
 Case2.pack()
-Case3 = Checkbutton(text=u"The Beatles", variable=Val3)
+Case3 = Checkbutton(Cadre, text=u"The Beatles", variable=Val3)
 Case3.pack()
-Case4 = Checkbutton(text=u"Adele", variable=Val4)
+Case4 = Checkbutton(Cadre, text=u"Adele", variable=Val4)
 Case4.pack()
 
+
 # Valider les textes de références à charger
-coche = Button(fenetre, text=u'Valider les textes')
+coche = Button(Cadre, text=u'Valider les textes')
 coche.bind("<Button-1>", valider)
 coche.pack()
 
-charge = Button(fenetre, text=u'Charger le dictionnaire')
+charge = Button(Cadre, text=u'Charger le dictionnaire')
 charge.bind("<Button-1>", charger)
-charge.pack()
+charge.pack(side = BOTTOM)
 
 fenetre.mainloop()
+
 
 
 
