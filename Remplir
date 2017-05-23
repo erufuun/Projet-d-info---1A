@@ -61,19 +61,46 @@ def rempl_dic (daf, freq, n, quels) :
     # quels : liste de booléens
     for i in range (n) : 
         if quels[0] :
-            ajout_texte (Anglais, Francais, daf)
+            ajout_texte (Anglais, Francais, daf, freq)
         if quels[1] : 
             for j in range (2) : 
-                ajout_texte (Court_en, Court_fr, daf)
+                ajout_texte (Court_en, Court_fr, daf, freq)
         if quels[2] :
-            ajout_texte (Beatles_EN, Beatles_FR, daf)
+            ajout_texte (Beatles_EN, Beatles_FR, daf, freq)
         if quels[3] :
-            ajout_texte (Adele_en, Adele_fr, daf)
+            ajout_texte (Adele_en, Adele_fr, daf, freq)
         print(i)
-    freq = freq_hyp(daf)
-    daf = mauvaise_trad (daf, freq, 0.1)
+    f = freq_hyp(daf)
+    daf = mauvaise_trad (daf, f, 0.1)
     return daf, freq
+ 
+#####################
+#       Tests       #
+#####################
+#rempl_dic (daf, fre, 2, [False, True, True, False])
 
-
-#rempl_dic (daf, fre, 2, [False, True, False, False])
-
+#################################################
+#                                               #
+#         Amélioration du dictionnaire          # 
+#                                               #
+#################################################
+# Amélioration du dictionnaire pour les traductions.
+# Mais avec quels textes ?
+def ameliore_dic (daf, n, quels) : 
+    # quels : liste de booléens
+    for i in range (n) : 
+        if quels[0] :
+            retro (Anglais, Francais, daf)
+        if quels[1] : 
+            for j in range (2) : 
+                retro (Court_en, Court_fr, daf)
+        if quels[2] :
+            retro (Beatles_EN, Beatles_FR, daf)
+        if quels[3] :
+            retro (Adele_en, Adele_fr, daf)
+        print(i)
+    f = freq_hyp(daf)
+    daf = mauvaise_trad (daf, f, 0.1)
+    return daf
+ 
+#ameliore_dic (daf, 2, [False, True, True, False])
