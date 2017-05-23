@@ -7,6 +7,8 @@
 # Un en anglais (a traduire) et un en français (traduction).
 
 from operator import itemgetter, attrgetter
+import pickle
+from copy import *
 
 #######################################
 #                                     #
@@ -634,19 +636,5 @@ def dist_txt (traduction, texte) :
 #####################
 #       Tests       #
 #####################
-#print(dist_txt("Bonjour, je suis ici.", "Bonjour, je serai ici."))
+# print(dist_txt("Bonjour, je suis ici.", "Bonjour, je serai ici."))
 # [4]
-
-    
-    
-######################################
-#                                    #
-#    Enregistrer les traductions     # 
-#                                    #
-######################################
-def sauvegarde (dico) : 
-    pass
-    
-
-
-
