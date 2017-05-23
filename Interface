@@ -26,8 +26,8 @@ def apropos():
 
 # Permet de traduire une chaîne de texte avec la fonction motamot
 def traduire (event) : 
-    global dic
-    chaine.configure(text = "Traduction : " + str(motamot(entree.get(), dic)))
+    global daf
+    chaine.configure(text = "Traduction : " + str(motamot(entree.get(), daf)))
 
 # Effacer le contenu du champs de saisi
 def efface_tout(event) :
@@ -35,21 +35,26 @@ def efface_tout(event) :
     chaine.configure(text = "")
 
 def charger (event) : 
-    global dic, freq, quels
-    dic, freq = {}, {} # Réinitialisation
+    global daf, freq, quels
+    daf, freq = {}, {} # Réinitialisation
     #exec(open("./Remplir.py", encoding="utf-8").read())
-    dic, freq = rempl_dic(daf, fre, 2, quels)
+    daf, freq = rempl_dic(daf, fre, 2, quels)
+    showinfo("Fin du chargement", "Le chargement du dictionnaire est maintenant fini !")
     
 def valider (event) :
     global Val1, Val2, Val3, Val4, quels
     liste = [Val1.get(), Val2.get(), Val3.get(), Val4.get()]
+    quels = []
     confi = ""
     for i in range (len(liste)) :
         boo = liste[i] # Valeur du booléen 
         quels += [boo]
         v = i + 1
-        confi += "{} booléen {}  \n".format(v, boo)
-    showinfo('info',quels)
+        if i == 0 :
+            confi += "{}er booléen {}  \n".format(v, boo)
+        else : 
+            confi += "{}ème booléen {}  \n".format(v, boo)
+    showinfo('info',confi)
     
 def cata () : 
     showinfo("Erreur de la nature", "Tu es nul, ton programme est nul, je te méprise. Signé l'ordi. :)")
@@ -58,27 +63,19 @@ def maxi () :
     showinfo("À la grosse vache", "Maximé, tu ne mérites même pas la vie. Alors pour le bien de l'humanité, chut.")
 
 def montre_mot (event) :
+    global daf, freq
     #display_dict_p (dic, word) 
-    chain.configure(text = "Information : ")
+    chain.configure(text = "Information : " + str(display_dict_p (daf, demand.get())) + '\n' + str(freq_vu (freq, demand.get())))
 
-def consult () :
-    Consul = Tk()
-    Consul.title("Trésor")
-    Consul.geometry('400x300') # Largeur * longueur
-    demand = Entry(Consul, width = 50)
-    demand.bind("<Return>", montre_mot)
-    chain = Label(Principal)
-    chain.pack()
 
 
 #######################################
-#                                     #
 #         Variables globales          # 
 #                                     #
 #######################################
 EN = StringVar()
 FR = StringVar() # 
-dic = {"Hello" : {"Bonjour" : 2}} # dic_hyp
+daf = {"Hello" : {"Bonjour" : 2}} # dic_hyp
 freq = {} # Dictionnaire des fréquences de mots
 
 # Choix des textes de références
@@ -94,7 +91,6 @@ Val4.set(False)
 
 quels = []
 
-
 # ------ Programme principal : ------
 #####################################
 #                                   #
@@ -105,7 +101,7 @@ quels = []
 menubar = Menu(fenetre)
 
 menu5 = Menu(menubar, tearoff=0)
-menu5.add_command(label="Consulter", command=consult)
+menu5.add_command(label="Consulter", command=consulter)
 menubar.add_cascade(label="Dictionnaire", menu=menu5)
 
 
@@ -126,27 +122,51 @@ presentation=Label(fenetre, text="Bienvenue dans le traducteur anglais-français
 presentation.pack(fill=BOTH)
 
 fenetre.title("Poisson d'or")
-fenetre.geometry('800x300') # Largeur * longueur
+fenetre.geometry('900x500') # Largeur * longueur
 
-Principal = Frame(fenetre, height = 100, width = 200, bd=1, relief=SUNKEN)
+### Partie traduction ###
+Principal = Frame(fenetre, height = 100, width = 400, bd=1, relief=SUNKEN)
 Principal.pack(side = LEFT, fill=BOTH, expand=1)
+
+# Sous-partie traduction de texte
+Trad = Frame(Principal, height = 50, width = 400, bd=1, relief=SUNKEN)
+Trad.pack(fill=BOTH, expand=1)
+
+traduction=Label(Trad, text="Insérez votre texte ci-dessous")
+traduction.pack(fill=BOTH)
 # Barre d'insertion
-entree = Entry(Principal, width = 50)
+entree = Entry(Trad, width = 50)
 entree.bind("<Return>", traduire)
 #entree.grid(column=0,row=0) #,sticky='EW')
 entree.pack()
 
 # Traduction en-dessous
-chaine = Label(Principal)
+chaine = Label(Trad)
 #chaine.grid(column=0,row=1) #,sticky='EW')
 #chaine.pack(expand=YES, fill=BOTH)
 chaine.pack()
 
 # Bouton pour effacer la phrase à traduire et la phrase traduite.
-effacer = Button(Principal, text=u'Effacer')
+effacer = Button(Trad, text=u'Effacer')
 effacer.bind("<Button-1>", efface_tout)
 effacer.pack()
 
+# Sous-partie consultation du dictionnaire
+Consul = Frame(Principal, height = 50, width = 400, bd=1, relief=SUNKEN)
+Consul.pack(side = BOTTOM, fill=BOTH, expand=1)
+
+Consul_info=Label(Consul, text="Consulter le dictionnaire anglais-français")
+Consul_info.pack(fill=BOTH)
+
+demand = Entry(Consul, width = 20)
+demand.bind("<Return>", montre_mot)
+demand.pack()
+
+chain = Label(Consul)
+chain.pack()
+
+
+### Partie dictionnaire ###
 Cadre = Frame(fenetre, height = 100, width = 200, bd=1, relief=SUNKEN)
 Cadre.pack(side = RIGHT, fill=BOTH, expand=1)
 
@@ -174,9 +194,6 @@ charge.bind("<Button-1>", charger)
 charge.pack(side = BOTTOM)
 
 fenetre.mainloop()
-
-
-
 
 
 
