@@ -104,3 +104,5 @@ def ameliore_dic (daf, n, quels) :
     return daf
  
 #ameliore_dic (daf, 2, [False, True, True, False])
+
+
