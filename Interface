@@ -89,10 +89,9 @@ def amelioration (event) :
     daf = ameliore_dic (daf, 2, ame_quels)
     showinfo("Fin de l'amélioration", "L'amélioration du dictionnaire est maintenant finie !")
 
-
 def ame_valider (event) :
-    global Val1, Val2, Val3, Val4, ame_quels
-    liste = [Val1.get(), Val2.get(), Val3.get(), Val4.get()]
+    global Ame_Val1, Ame_Val2, Ame_Val3, Ame_Val4, ame_quels
+    liste = [Ame_Val1.get(), Ame_Val2.get(), Ame_Val3.get(), Ame_Val4.get()]
     ame_quels = []
     confi = ""
     for i in range (len(liste)) :
@@ -105,14 +104,35 @@ def ame_valider (event) :
             confi += "{}ème booléen {}  \n".format(v, boo)
     showinfo('Amélioration',confi)
 
+# Écrire dans un fichier texte la traduction
+def traduction_fen () : 
+    global daf
+    open('Traduction.txt', 'w')
+    text = str(motamot(entree.get(), daf))
+    with open("Traduction.txt", "a") as f:
+        f.write(text)
+    showinfo('Information',"La nouvelle fenêtre est prête !")
+
+# Afficher la traduction obtenue dans le fichier traduction
+def ouvrir () :
+    fich = Toplevel()
+    fich.title("Traduction")
+    Tex = Text(fich)
+    Tex.pack()
+    nom_fich = "Traduction.txt"
+    with open(nom_fich) as f:
+        Tex.insert(1.0, f.read())
+    fich.mainloop()
+
 #######################################
 #                                     #
 #         Variables globales          # 
 #                                     #
 #######################################
 EN = StringVar()
-FR = StringVar() # 
-daf = {"Hello" : {"Bonjour" : 2}} # dic_hyp
+FR = StringVar() 
+daf = {"Hello" : {"Bonjour" : 2}} 
+daf_ame = {"Hello" : {"Bonjour" : 2}} 
 freq = {} # Dictionnaire des fréquences de mots
 
 # Choix des textes de références
@@ -149,6 +169,11 @@ ame_quels = []
 # Création du menu
 menubar = Menu(fenetre)
 
+menu4 = Menu(menubar, tearoff=0)
+menu4.add_command(label="Nouvelle fenêtre", command=traduction_fen)
+menu4.add_command(label="Afficher", command=ouvrir)
+menubar.add_cascade(label="Traduction", menu=menu4)
+
 menu5 = Menu(menubar, tearoff=0)
 menu5.add_command(label="Télécharger", command=lire_sauve)
 menu5.add_command(label="Enregistrer", command=sauvegarde)
@@ -168,11 +193,12 @@ fenetre.config(menu=menubar)
 #         Personnalisation          # 
 #                                   #
 #####################################
-presentation=Label(fenetre, text=u"Bienvenue dans le traducteur anglais-français Poisson d'or !")
-presentation.pack(fill=BOTH)
-
 fenetre.title("Poisson d'or")
 fenetre.geometry('900x600') # Largeur * longueur
+#fenetre.wm_attributes('-transparent', True)
+
+presentation=Label(fenetre, text=u"Bienvenue dans le traducteur anglais-français Poisson d'or !")
+presentation.pack(fill=BOTH)
 
 ### Partie traduction ###
 Principal = Frame(fenetre, height = 150, width = 400, bd=1, relief=SUNKEN)
@@ -187,17 +213,24 @@ traduction.pack(fill=BOTH)
 # Barre d'insertion
 entree = Entry(Trad, width = 40)
 entree.bind("<Return>", traduire)
-#entree.grid(column=0,row=0) #,sticky='EW')
 entree.pack()
 
-Result = Frame(Trad, padx=5, pady=5, height = 30, width = 350, bd=1, relief=SUNKEN)
-Result = LabelFrame(Trad, text = u"Traduction")
+Contour = Frame(Trad, height = 100, width = 400, bd=1, relief=SUNKEN, bg="cornsilk")
+Contour = LabelFrame(Trad, text = u"Traduction")
+Contour.pack(fill=BOTH, expand=1)
+
+Result = Canvas(Contour, height = 80, width = 350, bd=1, relief=SUNKEN)
 Result.pack(fill=BOTH, expand=1)
+
 # Traduction en-dessous
-chaine = Label(Result)
+chaine = Label(Result) 
 #chaine.grid(column=0,row=1) #,sticky='EW')
 #chaine.pack(expand=YES, fill=BOTH)
 chaine.pack()
+chaine.place(relx=0.5, rely=0.5, anchor=CENTER) # Centrer la traduction
+
+
+#monte.config(command=chaine.yview)
 
 # Bouton pour effacer la phrase à traduire et la phrase traduite.
 Expl = Label(Trad, text = u"Effacer le texte et sa traduction")
@@ -242,7 +275,6 @@ Case3.pack()
 Case4 = Checkbutton(Chrg_dic, text=u"Adele", variable=Val4, bg="cornsilk")
 Case4.pack()
 
-
 # Valider les textes de références à charger
 coche = Button(Chrg_dic, text=u'Valider les textes', bg="cornsilk")
 coche.bind("<Button-1>", valider)
@@ -280,6 +312,8 @@ ame_charge.bind("<Button-1>", amelioration)
 ame_charge.pack(side = BOTTOM)
 
 fenetre.mainloop()
+
+
 
 
 
