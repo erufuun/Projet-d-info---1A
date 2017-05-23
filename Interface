@@ -27,7 +27,7 @@ def apropos():
 # Permet de traduire une chaîne de texte avec la fonction motamot
 def traduire (event) : 
     global daf
-    chaine.configure(text = "Traduction : " + str(motamot(entree.get(), daf)))
+    chaine.configure(text = str(motamot(entree.get(), daf)))
 
 # Effacer le contenu du champs de saisi
 def efface_tout(event) :
@@ -54,7 +54,7 @@ def valider (event) :
             confi += "{}er booléen {}  \n".format(v, boo)
         else : 
             confi += "{}ème booléen {}  \n".format(v, boo)
-    showinfo('info',confi)
+    showinfo('Chargement',confi)
     
 def cata () : 
     showinfo("Erreur de la nature", "Tu es nul, ton programme est nul, je te méprise. Signé l'ordi. :)")
@@ -62,14 +62,51 @@ def cata () :
 def maxi () : 
     showinfo("À la grosse vache", "Maximé, tu ne mérites même pas la vie. Alors pour le bien de l'humanité, chut.")
 
+# Afficher les informations sur un mot du dictionnaire
 def montre_mot (event) :
     global daf, freq
     #display_dict_p (dic, word) 
     chain.configure(text = "Information : " + str(display_dict_p (daf, demand.get())) + '\n' + str(freq_vu (freq, demand.get())))
 
+# Sauvegarder un dictionnaire dans un autre fichier (texte)
+def sauvegarde () : 
+    global daf
+    d = open('Sauvegarde.txt', 'wb')
+    pickle.dump(daf,d)
+    d.close()
+    showinfo("Fin de la sauvegarde", "La sauvegarde du dictionnaire est maintenant terminée !")
 
+# Récupérer un dictionnaire chargé du fichier texte
+def lire_sauve () : 
+    global daf
+    d = open('Sauvegarde.txt', 'rb')
+    daf = pickle.load(d)
+    d.close()
+    showinfo("Fin de la lecture", "Le téléchargement du dictionnaire est maintenant terminé !")
+    
+def amelioration (event) :
+    global daf, ame_quels
+    daf = ameliore_dic (daf, 2, ame_quels)
+    showinfo("Fin de l'amélioration", "L'amélioration du dictionnaire est maintenant finie !")
+
+
+def ame_valider (event) :
+    global Val1, Val2, Val3, Val4, ame_quels
+    liste = [Val1.get(), Val2.get(), Val3.get(), Val4.get()]
+    ame_quels = []
+    confi = ""
+    for i in range (len(liste)) :
+        boo = liste[i] # Valeur du booléen 
+        ame_quels += [boo]
+        v = i + 1
+        if i == 0 :
+            confi += "{}er booléen {}  \n".format(v, boo)
+        else : 
+            confi += "{}ème booléen {}  \n".format(v, boo)
+    showinfo('Amélioration',confi)
 
 #######################################
+#                                     #
 #         Variables globales          # 
 #                                     #
 #######################################
@@ -89,7 +126,19 @@ Val2.set(True) # Par défaut, on charge le texte court
 Val3.set(False)
 Val4.set(False)
 
+# Choix des textes de références pour l'amélioration
+Ame_Val1 = BooleanVar()
+Ame_Val2 = BooleanVar()
+Ame_Val3 = BooleanVar()
+Ame_Val4 = BooleanVar()
+
+Ame_Val1.set(False)
+Ame_Val2.set(True) # Par défaut, on charge le texte court
+Ame_Val3.set(False)
+Ame_Val4.set(False)
+
 quels = []
+ame_quels = []
 
 # ------ Programme principal : ------
 #####################################
@@ -101,7 +150,8 @@ quels = []
 menubar = Menu(fenetre)
 
 menu5 = Menu(menubar, tearoff=0)
-menu5.add_command(label="Consulter", command=consulter)
+menu5.add_command(label="Télécharger", command=lire_sauve)
+menu5.add_command(label="Enregistrer", command=sauvegarde)
 menubar.add_cascade(label="Dictionnaire", menu=menu5)
 
 
@@ -118,82 +168,120 @@ fenetre.config(menu=menubar)
 #         Personnalisation          # 
 #                                   #
 #####################################
-presentation=Label(fenetre, text="Bienvenue dans le traducteur anglais-français Poisson d'or !")
+presentation=Label(fenetre, text=u"Bienvenue dans le traducteur anglais-français Poisson d'or !")
 presentation.pack(fill=BOTH)
 
 fenetre.title("Poisson d'or")
-fenetre.geometry('900x500') # Largeur * longueur
+fenetre.geometry('900x600') # Largeur * longueur
 
 ### Partie traduction ###
-Principal = Frame(fenetre, height = 100, width = 400, bd=1, relief=SUNKEN)
+Principal = Frame(fenetre, height = 150, width = 400, bd=1, relief=SUNKEN)
 Principal.pack(side = LEFT, fill=BOTH, expand=1)
 
-# Sous-partie traduction de texte
-Trad = Frame(Principal, height = 50, width = 400, bd=1, relief=SUNKEN)
+# Sous-partie traduction de texte #
+Trad = Frame(Principal, height = 60, width = 400, bd=1, relief=SUNKEN)
 Trad.pack(fill=BOTH, expand=1)
 
-traduction=Label(Trad, text="Insérez votre texte ci-dessous")
+traduction=Label(Trad, text=u"Insérez votre texte ci-dessous")
 traduction.pack(fill=BOTH)
 # Barre d'insertion
-entree = Entry(Trad, width = 50)
+entree = Entry(Trad, width = 40)
 entree.bind("<Return>", traduire)
 #entree.grid(column=0,row=0) #,sticky='EW')
 entree.pack()
 
+Result = Frame(Trad, padx=5, pady=5, height = 30, width = 350, bd=1, relief=SUNKEN)
+Result = LabelFrame(Trad, text = u"Traduction")
+Result.pack(fill=BOTH, expand=1)
 # Traduction en-dessous
-chaine = Label(Trad)
+chaine = Label(Result)
 #chaine.grid(column=0,row=1) #,sticky='EW')
 #chaine.pack(expand=YES, fill=BOTH)
 chaine.pack()
 
 # Bouton pour effacer la phrase à traduire et la phrase traduite.
+Expl = Label(Trad, text = u"Effacer le texte et sa traduction")
+Expl.pack(side = LEFT)
 effacer = Button(Trad, text=u'Effacer')
 effacer.bind("<Button-1>", efface_tout)
 effacer.pack()
 
-# Sous-partie consultation du dictionnaire
-Consul = Frame(Principal, height = 50, width = 400, bd=1, relief=SUNKEN)
+# Sous-partie consultation du dictionnaire #
+Consul = Frame(Principal, height = 60, width = 400, bd=1, relief=SUNKEN, bg="cornsilk")
 Consul.pack(side = BOTTOM, fill=BOTH, expand=1)
 
-Consul_info=Label(Consul, text="Consulter le dictionnaire anglais-français")
+Consul_info=Label(Consul, text=u"Consulter le dictionnaire anglais-français", bg="cornsilk")
 Consul_info.pack(fill=BOTH)
 
 demand = Entry(Consul, width = 20)
 demand.bind("<Return>", montre_mot)
 demand.pack()
 
-chain = Label(Consul)
+chain = Label(Consul, bg="cornsilk")
 chain.pack()
 
 
 ### Partie dictionnaire ###
-Cadre = Frame(fenetre, height = 100, width = 200, bd=1, relief=SUNKEN)
+Cadre = Frame(fenetre, height = 150, width = 200, bd=1, relief=SUNKEN)
 Cadre.pack(side = RIGHT, fill=BOTH, expand=1)
 
-Pres_case=Label(Cadre, text="Choisissez les textes références à utiliser")
+# Sous-partie chargement du dictionnaire avec les textes #
+Chrg_dic = Frame(Cadre, height = 40, width = 200, bd=1, relief=SUNKEN, bg="cornsilk")
+Chrg_dic.pack(fill=BOTH, expand=1)
+
+Pres_case=Label(Chrg_dic, text=u"Choisissez les textes références à utiliser", bg="cornsilk")
 Pres_case.pack(fill=BOTH)
 
 # Case à cocher pour les textes de références
-Case1 = Checkbutton(Cadre, text=u"Mon texte", variable=Val1)
+Case1 = Checkbutton(Chrg_dic, text=u"Mon texte", variable=Val1, bg="cornsilk")
 Case1.pack()
-Case2 = Checkbutton(Cadre, text=u"Texte court", variable=Val2)
+Case2 = Checkbutton(Chrg_dic, text=u"Texte court", variable=Val2, bg="cornsilk")
 Case2.pack()
-Case3 = Checkbutton(Cadre, text=u"The Beatles", variable=Val3)
+Case3 = Checkbutton(Chrg_dic, text=u"The Beatles", variable=Val3, bg="cornsilk")
 Case3.pack()
-Case4 = Checkbutton(Cadre, text=u"Adele", variable=Val4)
+Case4 = Checkbutton(Chrg_dic, text=u"Adele", variable=Val4, bg="cornsilk")
 Case4.pack()
 
 
 # Valider les textes de références à charger
-coche = Button(Cadre, text=u'Valider les textes')
+coche = Button(Chrg_dic, text=u'Valider les textes', bg="cornsilk")
 coche.bind("<Button-1>", valider)
 coche.pack()
 
-charge = Button(Cadre, text=u'Charger le dictionnaire')
+charge = Button(Chrg_dic, text=u'Charger le dictionnaire')
 charge.bind("<Button-1>", charger)
 charge.pack(side = BOTTOM)
 
+# Sous-partie amelioration du dictionnaire avec les textes #
+Ame_dic = Frame(Cadre, height = 50, width = 200, bd=1, relief=SUNKEN, bg="cornsilk")
+Ame_dic.pack(fill=BOTH, expand=1)
+
+Ame_case=Label(Ame_dic, text=u"Choisissez les textes à utiliser pour améliorer", bg="cornsilk")
+Ame_case.pack(fill=BOTH)
+
+# Case à cocher pour les textes de références
+Ame_case1 = Checkbutton(Ame_dic, text=u"Mon texte", variable=Ame_Val1, bg="cornsilk")
+Ame_case1.pack()
+Ame_case2 = Checkbutton(Ame_dic, text=u"Texte court", variable=Ame_Val2, bg="cornsilk")
+Ame_case2.pack()
+Ame_case3 = Checkbutton(Ame_dic, text=u"The Beatles", variable=Ame_Val3, bg="cornsilk")
+Ame_case3.pack()
+Ame_case4 = Checkbutton(Ame_dic, text=u"Adele", variable=Ame_Val4, bg="cornsilk")
+Ame_case4.pack()
+
+
+# Valider les textes de références à utiliser
+ame_coche = Button(Ame_dic, text=u'Valider les textes', bg="cornsilk")
+ame_coche.bind("<Button-1>", ame_valider)
+ame_coche.pack()
+
+ame_charge = Button(Ame_dic, text=u'Améliorer')
+ame_charge.bind("<Button-1>", amelioration)
+ame_charge.pack(side = BOTTOM)
+
 fenetre.mainloop()
+
+
 
 
 
