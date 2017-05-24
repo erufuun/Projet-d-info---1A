@@ -11,7 +11,6 @@ from tkinter.filedialog import *
 from tkinter.messagebox import *
 import os
 
-
 # Créer la fenêtre
 fenetre = Tk()
 
@@ -123,6 +122,15 @@ def ouvrir () :
     with open(nom_fich) as f:
         Tex.insert(1.0, f.read())
     fich.mainloop()
+    
+def distanz (event) :
+    global Compa, daf
+    liste = [[Anglais, Francais], [Court_en, Court_fr], [Beatles_EN, Beatles_FR], [Adele_en, Adele_fr]]
+    consid = liste[Compa.get()] # Liste avec le texte à traduire et le texte traduit
+    traduction = motamot(consid[0], daf)
+    dili = dist_txt(traduction, consid[1]) # Liste avec les distances
+    dist.configure(text = "Distance : " + str(distint(dili)) + '\n' + "Détails : " + str(dili))
+    
 
 #######################################
 #                                     #
@@ -156,6 +164,10 @@ Ame_Val1.set(False)
 Ame_Val2.set(True) # Par défaut, on charge le texte court
 Ame_Val3.set(False)
 Ame_Val4.set(False)
+
+# Choix du texte pour la distance de traduction
+Compa=IntVar() # Un entier
+Compa.set(1) # Le bouton est par défaut sur le texte court
 
 quels = []
 ame_quels = []
@@ -284,34 +296,70 @@ charge = Button(Chrg_dic, text=u'Charger le dictionnaire')
 charge.bind("<Button-1>", charger)
 charge.pack(side = BOTTOM)
 
-# Sous-partie amelioration du dictionnaire avec les textes #
-Ame_dic = Frame(Cadre, height = 50, width = 200, bd=1, relief=SUNKEN, bg="cornsilk")
-Ame_dic.pack(fill=BOTH, expand=1)
+# Sous-partie amélioration du dictionnaire avec les textes #
+#Ame_dic = Frame(Cadre, height = 50, width = 200, bd=1, relief=SUNKEN, bg="cornsilk")
+#Ame_dic.pack(fill=BOTH, expand=1)
 
-Ame_case=Label(Ame_dic, text=u"Choisissez les textes à utiliser pour améliorer", bg="cornsilk")
-Ame_case.pack(fill=BOTH)
+#Ame_case=Label(Ame_dic, text=u"Choisissez les textes à utiliser pour améliorer", bg="cornsilk")
+#Ame_case.pack(fill=BOTH)
 
 # Case à cocher pour les textes de références
-Ame_case1 = Checkbutton(Ame_dic, text=u"Mon texte", variable=Ame_Val1, bg="cornsilk")
-Ame_case1.pack()
-Ame_case2 = Checkbutton(Ame_dic, text=u"Texte court", variable=Ame_Val2, bg="cornsilk")
-Ame_case2.pack()
-Ame_case3 = Checkbutton(Ame_dic, text=u"The Beatles", variable=Ame_Val3, bg="cornsilk")
-Ame_case3.pack()
-Ame_case4 = Checkbutton(Ame_dic, text=u"Adele", variable=Ame_Val4, bg="cornsilk")
-Ame_case4.pack()
+#Ame_case1 = Checkbutton(Ame_dic, text=u"Mon texte", variable=Ame_Val1, bg="cornsilk")
+#Ame_case1.pack()
+#Ame_case2 = Checkbutton(Ame_dic, text=u"Texte court", variable=Ame_Val2, bg="cornsilk")
+#Ame_case2.pack()
+#Ame_case3 = Checkbutton(Ame_dic, text=u"The Beatles", variable=Ame_Val3, bg="cornsilk")
+#Ame_case3.pack()
+#Ame_case4 = Checkbutton(Ame_dic, text=u"Adele", variable=Ame_Val4, bg="cornsilk")
+#Ame_case4.pack()
 
 
 # Valider les textes de références à utiliser
-ame_coche = Button(Ame_dic, text=u'Valider les textes', bg="cornsilk")
-ame_coche.bind("<Button-1>", ame_valider)
-ame_coche.pack()
+#ame_coche = Button(Ame_dic, text=u'Valider les textes', bg="cornsilk")
+#ame_coche.bind("<Button-1>", ame_valider)
+#ame_coche.pack()
 
-ame_charge = Button(Ame_dic, text=u'Améliorer')
-ame_charge.bind("<Button-1>", amelioration)
-ame_charge.pack(side = BOTTOM)
+#ame_charge = Button(Ame_dic, text=u'Améliorer')
+#ame_charge.bind("<Button-1>", amelioration)
+#ame_charge.pack(side = BOTTOM)
+
+# Valider les textes de références à utiliser
+#ame_coche = Button(Ame_dic, text=u'Valider les textes', bg="cornsilk")
+#ame_coche.bind("<Button-1>", ame_valider)
+#ame_coche.pack()
+
+#ame_charge = Button(Ame_dic, text=u'Améliorer')
+#ame_charge.bind("<Button-1>", amelioration)
+#ame_charge.pack(side = BOTTOM)
+
+# Sous-partie distance de traduction #
+Comp = Frame(Cadre, height = 50, width = 200, bd=1, relief=SUNKEN, bg="cornsilk")
+Comp.pack(fill=BOTH, expand=1)
+
+Explcomp=Label(Comp, text=u"Différences avec le texte de référence", bg="cornsilk")
+Explcomp.pack(fill=BOTH)
+
+# Case à cocher pour les textes de références
+Comp_case1=Radiobutton(Comp, text=u"Mon texte", variable=Compa, value=0, bg="cornsilk")
+Comp_case2=Radiobutton(Comp, text=u"Texte court", variable=Compa, value=1, bg="cornsilk")
+Comp_case3=Radiobutton(Comp, text=u"The Beatles", variable=Compa, value=2, bd=2, bg="cornsilk")
+Comp_case4=Radiobutton(Comp, text=u"Adele", variable=Compa, value=3, bd=2, bg="cornsilk")
+Comp_case1.pack()
+Comp_case2.pack()
+Comp_case3.pack()
+Comp_case4.pack()
+
+
+susp = Button(Comp, text=u'Distance')
+susp.bind("<Button-1>", distanz)
+susp.pack(side = BOTTOM)
+
+dist = Label(Comp, bg="cornsilk")
+dist.pack()
+
 
 fenetre.mainloop()
+
 
 
 
