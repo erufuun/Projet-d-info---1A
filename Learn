@@ -476,7 +476,7 @@ def display_dict_p (dico, word) :
     d = dico[word] # Dictionnaire des traductions
     for cle, valeur in d.items():
         if valeur != 0 : 
-            return("{} peut être traduit par {} et a été traduit {} fois de cette façon.".format(word, cle, valeur))
+            return("'{}' peut être traduit par '{}' et a été traduit {} fois de cette façon.".format(word, cle, valeur))
 
 #####################
 #       Tests       #
@@ -488,7 +488,7 @@ def display_dict_p (dico, word) :
 def freq_vu (freq, word) : 
     val = freq[word]
     if word != "" : 
-        return ("{} a été vu {} fois dans nos textes utilisés.".format(word, val))
+        return ("'{}' a été vu {} fois dans nos textes utilisés.".format(word, val))
 
 #####################
 #       Tests       #
@@ -599,12 +599,12 @@ def distance (tradu, liste) :
         p, q = len(t), len(l) # Longueur des mots à comparer
         for j in range (min(p, q)) : 
             lett, letl = t[j], l[j] # Lettre du mot
-            print("lett =", lett, "letl =", letl)
+            #print("lett =", lett, "letl =", letl)
             if not((lett == letl) or (lett.lower() == letl) or (lett == letl.lower())) :
                 s += 1
         for k in range (abs(q - p)) :
             s += 1
-        print("s =", s)
+        #print("s =", s)
         compt += [s]
     return compt
 
@@ -621,12 +621,22 @@ def distance (tradu, liste) :
 # Mesure la distance de traduction sur des textes.
 def dist_txt (traduction, texte) :
     trad, txt = paragraphy_fal (traduction), paragraphy_fal (texte)
-    print("trad =", trad, "txt =", txt)
+    #print("trad =", trad, "txt =", txt)
     # On suppose qu'ils ont le même nombre de phrases.
     D = [] # liste des distances
     for i in range (len(trad)) : # Pour chaque phrase.
         tra, tx = hashify_sent (trad[i]), hashify_sent(txt[i])
-        dist = distance(tra, tx) # Liste des distances
+        n, m = len(tra), len(tx)
+        dist = 0
+        if n >= m : # tra plus long que tx
+            for j in range (m + 1, n) : 
+                dist += len(tra[j])
+            tra = tra[:m]
+        else : # n < m
+            for j in range (n + 1, m) :
+                dist += m -n 
+            tx = tx[:n]
+        dist = distance(tra, tx) # Distance locale
         d = 0 
         for i in range (len(dist)) : 
             d += dist[i]
@@ -638,3 +648,12 @@ def dist_txt (traduction, texte) :
 #####################
 # print(dist_txt("Bonjour, je suis ici.", "Bonjour, je serai ici."))
 # [4]
+
+
+# À partir de la liste des distances, renvoie un entier : la distance entre les textes
+def distint (liste) :
+    s = 0
+    for X in liste :
+        s += X
+    return s
+
