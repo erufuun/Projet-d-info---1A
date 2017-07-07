@@ -108,16 +108,6 @@ def motamot_mot (word, dic) :
 #    Correction du dictionnaire    # 
 #                                  #
 ####################################
-# Double controle
-# Faire une traduction EN-FR et une FR-EN pour voir les points communs.
-def doublecontrole_id (text, texte, dico) :
-    daf = identique(text, texte, {}) # EN-FR
-    dfa = identique(texte, text, {}) # FR-EN
-    for X in daf :
-        if (dfa[daf[X]]==X) : # Meme traduction quel que soit le sens
-            dico[X] = dico.get(daf[X], daf[X])
-    return dico
-
 # Trouve l'indice d'un élément dans une liste
 def trouve_index (liste, mot) : 
     # Le mot est supposé être dans la liste
