@@ -1,7 +1,7 @@
 import cProfile
-from DeepLearn import *
+from Remplir import *
 
 def testing () :
-        return deeplearn (daf, frequence, Anglais, Francais)
+        return ajout_texte (Anglais, Francais, daf, freq)
 
 cProfile.run("testing()", sort = "tottime")
