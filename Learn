@@ -15,8 +15,8 @@ from copy import *
 #        Creer un dictionnaire        # 
 #                                     #
 #######################################
-# Creer un dictionnaire qui compte les occurences des mots dans un texte.
-def occurence (texte) :
+# Creer un dictionnaire qui compte les occurrences des mots dans un texte.
+def occurrence (texte) :
         # texte est une liste de chaine de caractere (mots)
         d = {}
         for X in texte :
@@ -26,7 +26,7 @@ def occurence (texte) :
 # Dictionnaire final : anglais en clef, francais en valeur
 # francais : un dictionnaire avec les traductions possibles et sa fréquence 
 # Donc dictionnaire final : chaine -> dictionnaire.
-# Dictionnaire des occurences globales des mots : anglais en clef, occurence (entier) en valeur.
+# Dictionnaire des occurrences globales des mots : anglais en clef, occurrence (entier) en valeur.
 
 ########################################
 #                                      #
@@ -124,10 +124,10 @@ def hashify_sent (phrase) :
 #       Ajouter un mot dans le dictionnaire        # 
 #                                                                        #
 ######################################
-# Ajouter un mot au dictionnaire final avec une occurence occu et une traduction trad
+# Ajouter un mot au dictionnaire final avec une occurrence occu et une traduction trad
 #def ajout_mot (mot, trad, dictionnaire, occu) :
     #dic = dictionnaire.get(mot, {}) # Dictionnaire des traductions possibles de mot (anglais)
-    #dic[trad] = dic.get(trad, 0) + occu # Ajout du mot avec son occurence correspondante
+    #dic[trad] = dic.get(trad, 0) + occu # Ajout du mot avec son occurrence correspondante
     #dictionnaire[mot] = dic
         
 # Apprentissage d'un mot avec une probabilité de n
@@ -139,7 +139,7 @@ def apprend_mot (word, mot, dico, n) :
         if mot in di : # Si le mot traduit est déjà dans le dictionnaire
             c = di[mot] + n
             di[mot] = c
-        else : # Si le mot traduit n'est pas encore dans le dictionanire
+        else : # Si le mot traduit n'est pas encore dans le dictionnaire
             di.update({mot : n})
         dico.update ({word : di})
     else : # Si le mot n'est pas encore dans le dictionnaire
@@ -150,8 +150,8 @@ def apprend_mot (word, mot, dico, n) :
 #####################
 #       Tests       #
 #####################
-# dico = {'': {'': 3}, 'a': {'': 0, 'b': 3}}
-# apprend_mot ('c', 'd', dico, 3)
+dico = {'': {'': 3}, 'a': {'': 0, 'b': 3}}
+apprend_mot ('c', 'd', dico, 3)
 # {'': {'': 3}, 'a': {'': 0, 'b': 3}, 'c': {'d': 3}}
 # apprend_mot ('c', 'd', dico, 4)
 # {'': {'': 3}, 'a': {'': 0, 'b': 3}, 'c': {'d': 7}}
@@ -164,13 +164,11 @@ def apprend_mot (word, mot, dico, n) :
 #                                                                      #
 #####################################
 def rempl_freq (text) :
-        freq = {}
-        # text est le texte en anglais, texte celui en francais : une chaine de caracteres (texte "brut").
-        anglais = hashify_sent (text) # Liste de mots pour occurence
-        dic_en = occurence (anglais)
-        for X in dic_en :
-                freq[X] = freq.get(X, 0) + dic_en[X] # Ajouter l'occurence globale
-        return freq
+    freq = {}
+    # text est le texte en anglais : une chaine de caracteres (texte "brut").
+    anglais = hashify_sent (text) # Liste de mots pour occurrence
+    freq = occurrence (anglais)
+    return freq
 
 ###################################
 #                                 #
@@ -180,42 +178,42 @@ def rempl_freq (text) :
 # Trouver les mots toujours traduit de la meme facon dans le texte.
 # H : Meme nombre de phrases : une phrase en anglais traduit par une phrase en francais.
 def identique (text, texte, dico) :
-        # text est le texte en anglais, texte celui en francais : une chaine de caracteres (texte "brut").
-        anglais, francais = hashify_sent (text), hashify_sent (texte) # Liste de mots pour occurence
-        dic_en, dic_fr = occurence (anglais), occurence (francais)
-        sentences, phrases = paragraphy_fal (text), paragraphy_fal (texte) # Texte decoupe en phrases (liste de chaines)
-        #print("sentences =", sentences, "phrases =", phrases)
-        n = len(sentences) # Nombre de phrases
-        dictionnaire = {} # dictionnaire renvoyé
-        # 1. Comparaison d'occurence dans tout le texte
-        for X in dic_en :
-                #print("X =", X)
-                for Y in dic_fr :
-                        if (dic_en[X] == dic_fr[Y]) : # Meme occurence globale.
-                                #print("Y =", Y)
-        # 2. Comparaison d'occurence locale : phrase par phrase.
-                                par_ligne = True # Indicateur d'occurence locale
-                                for i in range (n) :
-                                        sentence, phrase = sentences[i], phrases[i] # Une phrase : une chaine de caractere
-                                        sentence, phrase = hashify_sent (sentence), hashify_sent (phrase)
-                                        locen, locfr = occurence (sentence), occurence (phrase)
-                                        existex, existey = (X in locen), (Y in locfr) # Le mot est present dans le phrase.
-                                        if existex : # Si X est dans la phrase en anglais
-                                            if existey : # Si Y est dans la phrase en francais
-                                                if (locen[X] == locfr[Y]) : # Meme occurence locale
-                                                    pass
-                                                else :
-                                                    par_ligne = False
-                                            else : # Si Y n'est pas dans la phrase en francais
-                                                par_ligne = False
-                                        else : # Si X n'est pas dans la phrase en anglais
-                                            if not existey : # Si Y n'est pas dans la phrase en francais
-                                                pass
-                                            else : # Si Y est dans la phrase en francais
-                                                par_ligne = False
-                                if (par_ligne) and (X != ""): # Mot a ajouter qui a une meme occurence sur tout le texte.
-                                        apprend_mot (X, Y, dictionnaire, dic_fr[Y])
-        return dictionnaire
+    # text est le texte en anglais, texte celui en francais : une chaine de caracteres (texte "brut").
+    anglais, francais = hashify_sent (text), hashify_sent (texte) # Liste de mots pour occurrence
+    dic_en, dic_fr = occurrence (anglais), occurrence (francais)
+    sentences, phrases = paragraphy_fal (text), paragraphy_fal (texte) # Texte decoupe en phrases (liste de chaines)
+    #print("sentences =", sentences, "phrases =", phrases)
+    n = len(sentences) # Nombre de phrases
+    dictionnaire = {} # dictionnaire renvoyé
+    # 1. Comparaison d'occurrence dans tout le texte
+    for X in dic_en :
+        #print("X =", X)
+        for Y in dic_fr :
+            if (dic_en[X] == dic_fr[Y]) : # Meme occurrence globale.
+                #print("Y =", Y)
+    # 2. Comparaison d'occurrence locale : phrase par phrase.
+                par_ligne = True # Indicateur d'occurrence locale
+                for i in range (n) :
+                    sentence, phrase = sentences[i], phrases[i] # Une phrase : une chaine de caractere
+                    sentence, phrase = hashify_sent (sentence), hashify_sent (phrase)
+                    locen, locfr = occurrence (sentence), occurrence (phrase)
+                    existex, existey = (X in locen), (Y in locfr) # Le mot est present dans le phrase.
+                    if existex : # Si X est dans la phrase en anglais
+                        if existey : # Si Y est dans la phrase en francais
+                            if (locen[X] == locfr[Y]) : # Meme occurrence locale
+                                pass
+                            else :
+                                par_ligne = False
+                        else : # Si Y n'est pas dans la phrase en francais
+                            par_ligne = False
+                    else : # Si X n'est pas dans la phrase en anglais
+                        if not existey : # Si Y n'est pas dans la phrase en francais
+                            pass
+                        else : # Si Y est dans la phrase en francais
+                            par_ligne = False
+                if (par_ligne) and (X != ""): # Mot a ajouter qui a une meme occurrence sur tout le texte.
+                    apprend_mot (X, Y, dictionnaire, dic_fr[Y])
+    return dictionnaire
 
 # Ne garder que les mots qui n'ont qu'une seule traduction
 def unifid (dico) :
@@ -359,9 +357,10 @@ def affect_lin1 (balise, phrase) :
 def unitsup (sentence, phrase, dic_supp) :
     n, m = len(sentence), len(phrase) # n < m par hypothese
     mini = min(n, m)
-    # 1. Baliser la phrase en anglais avec les mots deja la.
+    # 1. Créer la balise
     vide = ["", 0]
     balise = [vide] * n # Phrase balisee : mot francais * indice dans le phrase
+    # 2. Baliser la phrase en anglais avec les mots deja la.
     for i in range (mini) :
         word, mot = sentence[i], phrase[i] # Mots en anglais et en francais
         #print("phrase =", phrase)
@@ -386,17 +385,17 @@ def unitsup (sentence, phrase, dic_supp) :
                         #print("phrase =", phrase)
                     l += 1
     #print("balise =", balise)
-    # 2. Remplir entre les balises de début de phrase et de fin de phrase.
+    # 3. Remplir les balises de début de phrase et de fin de phrase.
     if (balise[n-1][0] == "") :
         balise[n-1] = [phrase[m-1], m-1] # Dernière balise toujours remplie
     if (balise[0][0] == "") :
         balise[0] = [phrase[0], 0] # Première balise toujours remplie
     balise = supp_vide_balise (balise)
     #print("balise_init = ", balise)
-    # 3. Affecter les mots restant par alignement
+    # 4. Affecter les mots restant par alignement
     balise = affect_lin1 (balise, phrase)
     #print("predic balise =", balise)
-    # 4. Affecter les balises au dictionnaire
+    # 5. Affecter les balises au dictionnaire
     for i in range (n) :
         apprend_mot (sentence[i], balise[i][0], dic_supp, 1)
     return dic_supp
@@ -446,7 +445,7 @@ def ponctu (dictionnaire) :
 # Remplir un dictionnaire hypothétique par alignement des mots 1-1
 # Même nombre de phrases
 def corresp_1 (text, texte, dico) :
-    # text est le texte en anglais, texte celui en francais : une chaêne de caractères (texte "brut").
+    # text est le texte en anglais, texte celui en francais : une chaîne de caractères (texte "brut").
     anglais, francais = paragraphy_fal (text), paragraphy_fal (texte) # Liste de phrases.
     n = len(anglais) # = len(francais)
     dic_supp = dico.copy() # Le dictionnaire renvoye, un dictionnaire d'hypothese de traduction.
@@ -474,15 +473,20 @@ def apprend_phrase (sentence, phrase, dico) :
 # Afficher les traductions possibles d'un mot
 def display_dict_p (dico, word) :
     d = dico[word] # Dictionnaire des traductions
+    ch = ''
     for cle, valeur in d.items():
         if valeur != 0 : 
-            return("'{}' peut être traduit par '{}' et a été traduit {} fois de cette façon.".format(word, cle, valeur))
-
+            ch += ("'{}' peut être traduit par '{}' avec un coefficient de traduction de {}.".format(word, cle, valeur))
+            ch += '\n'
+    return ch
+    
 #####################
 #       Tests       #
 #####################
-# dico = {'': {'': 3}, 'a': {'': 0, 'b': 3}}
+# dico = {'': {'': 3}, 'a': {'': 0, 'b': 3, 'c' : 4}}
 # print(display_dict_p (dico, "a"))
+# 'a' peut être traduit par 'b' avec un coefficient de traduction de 3.
+# 'a' peut être traduit par 'c' avec un coefficient de traduction de 4.
 
 # Afficher le nombre de fois où le mot a été vu
 def freq_vu (freq, word) : 
@@ -581,6 +585,30 @@ def mauvaise_trad (dico, freq, prob) :
 # dico, freq = {'': {'': 3}, 'a': {'': 1, 'b': 20}}, {'' : 3, 'a' : 21}
 # tra = mauvaise_trad (dico, freq, 0.1)
 # {'': {'': 3}, 'a': {'b': 20}}
+
+###############################
+#                             #
+#          Contexte           # 
+#                             #
+###############################
+# Regrouper les mots 2 par 2
+# Renvoyer une liste de mots (chaînes) à partir d'une liste de mots (chaînes)
+def par_deux (phrase) : 
+    liste = []
+    n = len (phrase)
+    for i in range (n-1) :
+        mot2 = phrase[i] + " " + phrase[i+1]
+        liste += [mot2]
+    return liste
+
+#####################
+#       Tests       #
+#####################  
+# sen = ['I', 'do', 'not', 'like', 'him']
+# print(par_deux (sen))
+# ['I do', 'do not', 'not like', 'like him']
+
+
 
 ####################################
 #                                  #
