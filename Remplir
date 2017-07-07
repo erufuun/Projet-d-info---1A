@@ -60,6 +60,13 @@ Adele_en = Adele_en.read()
 Adele_fr = open("Adele_fr.txt", "r", encoding="utf-8")
 Adele_fr = Adele_fr.read()
 
+# The Economist
+Economist_EN = open("Economist_EN.txt", "r", encoding="utf-8")
+Economist_EN = Economist_EN.read()
+Economist_FR = open("Economist_FR.txt", "r", encoding="utf-8")
+Economist_FR = Economist_FR.read()
+
+
 fre = {}
 daf = {}
 
@@ -84,6 +91,8 @@ def rempl_dic (daf, freq, n, quels) :
             #ajout_texte (Hello, Bonjour, daf, freq)
         if quels[3] :
             ajout_texte (Adele_en, Adele_fr, daf, freq)
+        #if quels[4] :
+            #ajout_texte (Economist_EN, Economist_FR, daf, freq)
         print(i)
     f = freq_hyp(daf)
     daf = mauvaise_trad (daf, f, 0.1)
@@ -118,13 +127,13 @@ def ameliore_dic (daf, n, quels) :
             dico = retro (Hello, Bonjour, daf)
         if quels[3] :
             dico = retro (Adele_en, Adele_fr, daf)
+        if quels[4] :
+            dico = retro (Economist_EN, Economist_FR, daf)
         print(i)
     f = freq_hyp(dico)
     daf = mauvaise_trad (dico, f, 0.1)
     return dico
  
 #ameliore_dic (daf, 2, [False, True, True, False])
-
-
 
 
